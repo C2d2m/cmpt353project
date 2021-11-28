@@ -46,7 +46,7 @@
             {
 
                 // document.getElementById("postBox").textContent();
-                alert("Message Sent!");
+                alert("Staff Added!");
                 document.getElementById("response").value = http.responseText;
                 // window.location.reload;
             }
@@ -55,6 +55,6 @@
 
         http.send(lastName+'&'+firstName+'&'+phoneNumber+'&'+notes);
 
-
+        window.location.href='./1'
     }
 </script>

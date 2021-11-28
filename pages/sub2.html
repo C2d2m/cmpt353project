@@ -1,5 +1,60 @@
 <!DOCTYPE html>
-<html>
-<label>This is sub page 2</label>
-<button onclick="window.location.href='../'">BACK</button> 
+<html lang="en">
+<label>Add Customer</label>
+
+
+
+<form>
+    <label for="fname">First name:</label><br>
+    <input type="text" id="fname" name="fname"><br>
+
+    <label for="lname">Last name:</label><br>
+    <input type="text" id="lname" name="lname"><br>
+
+    <label for="pNumber">Phone number:</label><br>
+    <input type="text" id="pNumber" name="pNumber"><br>
+
+    <label for="notes">Notes:</label><br>
+    <input type="text" id="notes" name="notes">
+</form>
+
+
+<button onclick="addCustomer()">ADD</button>
+<button onclick="window.location.href='../'">BACK</button>
+
 </html>
+
+<script>
+    function addCustomer()
+    {
+
+        var http = new XMLHttpRequest();
+        var url = '/customer_reg';
+
+        var firstName= 'firstName=' + document.getElementById("fname").value;
+        var lastName= 'lastName=' + document.getElementById("lname").value;
+        var phoneNumber= 'phoneNumber=' + document.getElementById("pNumber").value;
+        var notes= 'notes=' + document.getElementById("notes").value;
+
+        http.open('POST', url, true);
+
+        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+        http.onreadystatechange = function()
+        {
+            if(http.readyState == 4 && http.status == 200)
+            {
+
+                // document.getElementById("postBox").textContent();
+                alert("Customer Added!");
+                document.getElementById("response").value = http.responseText;
+                // window.location.reload;
+            }
+
+        };
+
+        http.send(lastName+'&'+firstName+'&'+phoneNumber+'&'+notes);
+
+        window.location.href='./2'
+    }
+</script>

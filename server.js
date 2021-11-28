@@ -50,7 +50,6 @@ app.get('/3', (req, res) => {
 // staff
 
 app.post('/staff_reg', (req, res) => {
-
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
 
@@ -58,10 +57,10 @@ app.post('/staff_reg', (req, res) => {
         sql : 'INSERT INTO staff (last_name, first_name, phone_number, notes) VALUES ("'+lName+'", "'+fName+'", "'+phoneNumber+'", "'+notes+'")'
     }, function (err){
         if (err) throw err;
-        console.log("1 record inserted");
+        console.log("1 record inserted into staff");
     });
 
-    // TODO: enter into sql db table (autoincrement?)
+
     res.send(`OK, added ${fName} to staff`) // or, depending on implementation, this can be a list of registered staff with details
 })
 
@@ -80,10 +79,17 @@ app.post('/staff_del', (err, req, res) => {
 
 
 // customers
-app.post('/customer_reg', (err, req, res) => {
-    var name = req.body.name;
-    // TODO: enter into sql db table (autoincrement?)
-    res.send(`OK, added ${name} to customers`) // or, depending on implementation, this can be a list of registered customers with data
+app.post('/customer_reg', (req, res) => {
+    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+
+    connection.query({
+        sql : 'INSERT INTO customers (last_name, first_name, phone_number, notes) VALUES ("'+lName+'", "'+fName+'", "'+phoneNumber+'", "'+notes+'")'
+    }, function (err){
+        if (err) throw err;
+        console.log("1 record inserted int customers");
+    });
+
+    res.send(`OK, added ${fName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
 })
 
 app.post('/customer_change', (err, req, res) => {
@@ -99,12 +105,19 @@ app.post('/customer_del', (err, req, res) => {
     res.send(`OK, deleted ${name} from customers`) // or, depending on implementation, this can be a list of registered customers 
 })
 
-app.post('/customer_report', (err, req, res) => {
-    var report = req.body.report; // Probably some long ass string
-    var name = req.body.name;
-    //TODO: find customer id by name in SQL
-    //      add (autoincrement) report to SQL table for reports, tagging with customer id      
-    res.send(`OK, added ${name}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
+app.post('/customer_report', (req, res) => {
+    let fName = req.body.firstName, lName = req.body.lastName, report = req.body.report;
+
+    connection.query({
+        SQL : 'SELECT id FROM project.customers WHERE last_Name = "'+lName+'" AND first_name = "'+fName+'"'
+    }, function (err, result, fields) {
+        if (err) throw err;
+        console.log(result);
+    });
+
+
+
+    res.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
 })
 
 app.post('/customer_view', (err, req, res) => {
