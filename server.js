@@ -1,25 +1,37 @@
 const express = require('express');
 const app = express();
 const bodyParser = require("body-parser");
+const mysql = require('mysql');
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const PORT = 8080;
 const HOST = "127.0.0.1";
 
+// MYSQL Database connection info, can be updated depending on how we want to host/ test
+const connection = mysql.createConnection({
+    host        :   'localhost',
+    user        :   'root',
+    password    :   'cmpt353password',
+    database    :   'project'
+})
+
 // required to avoid absolute pathing
 var path = require('path');
 
+// Establish connection to the database
+connection.connect(function(err) {
+    if (err) throw err;
+    console.log('connected as id ' + connection.threadId);
+});
 
-// TODO: database implementation / connection
-
-
-// Load main page on startup 
+// Load main page on startup
 app.get('/', (req, res) => {
     res.sendFile('index.html', { root: path.join(__dirname, './pages') });
 });
 
 
-// as cool as the idea of a general page loader was, it was hard and ugly to even try to implement (trying to render a filestream). 
+// as cool as the idea of a general page loader was, it was hard and ugly to even try to implement (trying to render a filestream).
 // Because it's simple I'll just implement GETs for each
 // The actual process of redirecting to these GETs is in the .html
 app.get('/1', (req, res) => {
@@ -34,12 +46,23 @@ app.get('/3', (req, res) => {
 
 
 // posts for accessing database stuff
-// Some notes: _change posts will ideally take in all modifiable var (name, age, etc) and use a flag for values to be left unchanged (instead of new posts for changing each var) 
+// Some notes: _change posts will ideally take in all modifiable var (name, age, etc) and use a flag for values to be left unchanged (instead of new posts for changing each var)
 // staff
+
 app.post('/staff_reg', (req, res) => {
-    var name = req.body.name;
+
+    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+
+
+    connection.query({
+        sql : 'INSERT INTO staff (last_name, first_name, phone_number, notes) VALUES ("'+lName+'", "'+fName+'", "'+phoneNumber+'", "'+notes+'")'
+    }, function (err){
+        if (err) throw err;
+        console.log("1 record inserted");
+    });
+
     // TODO: enter into sql db table (autoincrement?)
-    res.send(`OK, added ${name} to staff`) // or, depending on implementation, this can be a list of registered staff with details
+    res.send(`OK, added ${fName} to staff`) // or, depending on implementation, this can be a list of registered staff with details
 })
 
 app.post('/staff_change', (err, req, res) => {

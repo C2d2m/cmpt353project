@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <title>Example</title>
 
@@ -8,17 +8,17 @@
         </style>
 
     </head>
-    
+
     <body>
         <textarea id=response></textarea>
-        <button onclick="window.location.href='./1'">Page redirect 1</button> 
+        <button onclick="window.location.href='./1'">Add Staff</button>
         <button onclick="window.location.href='./2'">Page redirect 2</button>
         <button onclick="window.location.href='./3'">Page redirect 3</button>
         <button onclick="test()">test</button>
 
     </body>
 
-
+</html>
 
 
 <script type = "text/javascript">
@@ -29,29 +29,28 @@
         var http = new XMLHttpRequest();
         var url = '/staff_reg';
         var param = 'name=' + "TestName";
-           
+
         http.open('POST', url, true);
-    
+
         http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-    
-        http.onreadystatechange = function() 
-        { 
-            if(http.readyState == 4 && http.status == 200) 
+
+        http.onreadystatechange = function()
+        {
+            if(http.readyState == 4 && http.status == 200)
             {
-                 
+
             // document.getElementById("postBox").textContent();
             alert("Message Sent!");
             document.getElementById("response").value = http.responseText;
             // window.location.reload;
             }
-    
+
         };
-    
+
         http.send(param);
 
         // http.abort();
-    };
-    
+    }
+
     </script>
-    
-</html>
+
