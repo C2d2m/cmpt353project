@@ -52,7 +52,7 @@ app.get('/3', (req, res) => {
 app.post('/staff_reg', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
-
+    // Inserting new Staff
     connection.query({
         sql : 'INSERT INTO staff (last_name, first_name, phone_number, notes) VALUES ("'+lName+'", "'+fName+'", "'+phoneNumber+'", "'+notes+'")'
     }, function (err){
@@ -82,6 +82,7 @@ app.post('/staff_del', (err, req, res) => {
 app.post('/customer_reg', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
+    // Inserting new Customer
     connection.query({
         sql : 'INSERT INTO customers (last_name, first_name, phone_number, notes) VALUES ("'+lName+'", "'+fName+'", "'+phoneNumber+'", "'+notes+'")'
     }, function (err){
@@ -108,14 +109,26 @@ app.post('/customer_del', (err, req, res) => {
 app.post('/customer_report', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, report = req.body.report;
 
+    //Query Database for customer id of a given first and last name
     connection.query({
-        SQL : 'SELECT id FROM project.customers WHERE last_Name = "'+lName+'" AND first_name = "'+fName+'"'
+        sql : 'SELECT * FROM customers WHERE last_Name = "'+lName+'" AND first_name = "'+fName+'"'
     }, function (err, result, fields) {
         if (err) throw err;
-        console.log(result);
+
+        // Organize data from query
+        Object.keys(result).forEach(function(key) {
+            let row = result[key];
+            let customerID = row.id
+
+            // Add the report into reports with the customers id
+            connection.query({
+                sql : 'INSERT INTO reports (customer_id, report) VALUES ("'+customerID+'", "'+report+'")'
+            }, function (err, result, fields) {
+                if (err) throw err;
+                console.log("1 record inserted into records");
+            });
+        });
     });
-
-
 
     res.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
 })
