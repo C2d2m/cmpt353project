@@ -134,12 +134,40 @@ app.post('/customer_report', (req, res) => {
 })
 
 app.post('/customer_view', (err, req, res) => {
-    var name = req.body.name;
+    // var name = req.body.name;
     //TODO: find customer id by name in SQL
     //      get details from that customer
     //      use id to get list of reports from report DB
     //      make gabe figure out how to return data in usable (parsable string?) format for .html
-    res.send(`OK, here is ${name}'s details`) // this will eventually be readable data
+
+    //Query Database for customer id of a given first and last name
+    connection.query({
+        sql : 'SELECT * FROM customers'
+    }, function (err, result, fields) {
+        if (err) throw err;
+
+        // Organize data from query
+        var answer = ""
+        result.forEach(element => {
+            answer += element.first_name + "\t"
+            answer += element.last_name + "\t"
+            answer += element.phone_number + "\n"
+            answer += element.notes + "\n\n"
+        });
+        console.log(answer)
+        // let row = result[key];
+        // let customerID = row.id
+
+            // Add the report into reports with the customers id
+            // connection.query({
+            //     sql : 'INSERT INTO reports (customer_id, report) VALUES ("'+customerID+'", "'+report+'")'
+            // }, function (err, result, fields) {
+            //     if (err) throw err;
+            //     console.log("1 record inserted into records");
+            // });
+
+    });
+    // res.send(`OK, here is ${name}'s details`) // this will eventually be readable data
 })
 
 
