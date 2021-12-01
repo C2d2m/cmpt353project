@@ -1,0 +1,59 @@
+<html>
+    <body onload="viewCustomers()">
+        <p id='customers'> </p>
+        <button onclick="window.location.href='/customers/add'">+</button>
+        <button onclick="window.location.href='../'">BACK</button>
+    </body>
+    <script>
+        function viewCustomers()
+        {
+            document.getElementById("customers").textContent = "ran";
+    
+            var http = new XMLHttpRequest();
+            var url = '/customer_view';
+    
+            http.open('POST', url, true);
+    
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    
+            http.onreadystatechange = function()
+            {
+                if(http.readyState == 4 && http.status == 200)
+                {
+                    //obviously this isn't final, parsed should contain all data needed in correct format
+                    answer = http.responseText;
+                    parsed = parseStringResponse(answer)
+                    document.getElementById("customers").textContent = parsed[0].last_name;
+                }
+    
+            };
+    
+            http.send();
+    
+            // window.location.href='./'
+        }
+        function parseStringResponse(string) {
+            var stage_one = []
+            buffer = ""
+            Array.from(string).forEach((e, i) => {
+                if(e=="|") {
+                    stage_one.push(buffer)
+                    buffer = ""
+                }
+                else {
+                    buffer += e
+                }
+            });
+            var stage_two = []
+            for (let i = 0; i < stage_one.length; i+=4) {
+                var some_element = {}
+                some_element['id'] = stage_one[i]
+                some_element['first_name'] = stage_one[i+1]
+                some_element['last_name'] = stage_one[i+2]
+                some_element['notes'] = stage_one[i+3]
+                stage_two.push(some_element)
+            }
+            return stage_two
+        }
+    </script>
+</html>

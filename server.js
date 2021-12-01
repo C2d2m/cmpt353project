@@ -34,14 +34,20 @@ app.get('/', (req, res) => {
 // as cool as the idea of a general page loader was, it was hard and ugly to even try to implement (trying to render a filestream).
 // Because it's simple I'll just implement GETs for each
 // The actual process of redirecting to these GETs is in the .html
-app.get('/1', (req, res) => {
-    res.sendFile('sub1.html', { root: path.join(__dirname, './pages') });
+app.get('/staff/add', (req, res) => {
+    res.sendFile('add_staff.html', { root: path.join(__dirname, './pages') });
 })
-app.get('/2', (req, res) => {
-    res.sendFile('sub2.html', { root: path.join(__dirname, './pages') });
+app.get('/customers/add', (req, res) => {
+    res.sendFile('add_customer.html', { root: path.join(__dirname, './pages') });
 })
-app.get('/3', (req, res) => {
-    res.sendFile('sub3.html', { root: path.join(__dirname, './pages') });
+app.get('/report', (req, res) => {
+    res.sendFile('add_report.html', { root: path.join(__dirname, './pages') });
+})
+app.get('/staff', (req, res) => {
+    res.sendFile('view_staff.html', { root: path.join(__dirname, './pages') });
+})
+app.get('/customers', (req, res) => {
+    res.sendFile('view_customers.html', { root: path.join(__dirname, './pages') });
 })
 
 
@@ -64,17 +70,54 @@ app.post('/staff_reg', (req, res) => {
     res.send(`OK, added ${fName} to staff`) // or, depending on implementation, this can be a list of registered staff with details
 })
 
-app.post('/staff_change', (err, req, res) => {
+app.post('/staff_change', (req, res) => {
     var name = req.body.name;
     var newName = req.body.newName; // for example, change the name of some staff to a new name
     // TODO: find staff id by name in SQL, change their name field
     res.send(`OK, changed ${name} to ${newName} for staff`) // or, depending on implementation, this can be a list of registered staff
 })
 
-app.post('/staff_del', (err, req, res) => {
+app.post('/staff_del', (req, res) => {
     var name = req.body.name;
     // TODO: find staff id by name in SQL, delete them
     res.send(`OK, deleted ${name} from staff`) // or, depending on implementation, this can be a list of registered staff
+})
+app.post('/staff_view', (req, res) => {
+    // var name = req.body.name;
+    //TODO: find customer id by name in SQL
+    //      get details from that customer
+    //      use id to get list of reports from report DB
+    //      make gabe figure out how to return data in usable (parsable string?) format for .html
+
+    //Query Database for customer id of a given first and last name
+    connection.query({
+        sql : 'SELECT * FROM staff'
+    }, function (err, result, fields) {
+        if (err) throw err;
+        answer = ''
+        result.forEach(element => {
+            answer += element.id + "|"
+            answer += element.first_name + "|"
+            answer += element.last_name + "|"
+            answer += element.notes + "|"
+        });
+        res.send(answer)
+        
+
+        // let row = result[key];
+        // let customerID = row.id
+
+            // Add the report into reports with the customers id
+            // connection.query({
+            //     sql : 'INSERT INTO reports (customer_id, report) VALUES ("'+customerID+'", "'+report+'")'
+            // }, function (err, result, fields) {
+            //     if (err) throw err;
+            //     console.log("1 record inserted into records");
+            // });
+
+    });
+
+    // res.send(`OK, here is ${name}'s details`) // this will eventually be readable data
 })
 
 
@@ -93,14 +136,14 @@ app.post('/customer_reg', (req, res) => {
     res.send(`OK, added ${fName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
 })
 
-app.post('/customer_change', (err, req, res) => {
+app.post('/customer_change', (req, res) => {
     var name = req.body.name;
     var newName = req.body.newName; // for example, change the name of some customer to a new name. 
     // TODO: find customer id by name in SQL, change their name field
     res.send(`OK, changed ${name} to ${newName} for customer`) // or, depending on implementation, this can be a list of registered customers
 })
 
-app.post('/customer_del', (err, req, res) => {
+app.post('/customer_del', (req, res) => {
     var name = req.body.name;
     // TODO: find customer id by name in SQL, delete them
     res.send(`OK, deleted ${name} from customers`) // or, depending on implementation, this can be a list of registered customers 
@@ -133,7 +176,7 @@ app.post('/customer_report', (req, res) => {
     res.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
 })
 
-app.post('/customer_view', (err, req, res) => {
+app.post('/customer_view', (req, res) => {
     // var name = req.body.name;
     //TODO: find customer id by name in SQL
     //      get details from that customer
@@ -145,16 +188,16 @@ app.post('/customer_view', (err, req, res) => {
         sql : 'SELECT * FROM customers'
     }, function (err, result, fields) {
         if (err) throw err;
-
-        // Organize data from query
-        var answer = ""
+        answer = ''
         result.forEach(element => {
-            answer += element.first_name + "\t"
-            answer += element.last_name + "\t"
-            answer += element.phone_number + "\n"
-            answer += element.notes + "\n\n"
+            answer += element.id + "|"
+            answer += element.first_name + "|"
+            answer += element.last_name + "|"
+            answer += element.notes + "|"
         });
-        console.log(answer)
+        res.send(answer)
+        
+
         // let row = result[key];
         // let customerID = row.id
 
@@ -167,6 +210,7 @@ app.post('/customer_view', (err, req, res) => {
             // });
 
     });
+
     // res.send(`OK, here is ${name}'s details`) // this will eventually be readable data
 })
 
