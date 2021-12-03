@@ -34,7 +34,7 @@
             var http = new XMLHttpRequest();
             var url = '/customer_view';
     
-            http.open('POST', url, true);
+            http.open('GET', url, true);
             http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             http.onreadystatechange = function()
             {
@@ -124,7 +124,7 @@
 
             var param= 'id=' + id;
 
-            http.open('POST', url, true);
+            http.open('GET', url, true);
             http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             http.send(param);
 
