@@ -78,9 +78,16 @@ app.post('/staff_change', (req, res) => {
 })
 
 app.post('/staff_del', (req, res) => {
-    var name = req.body.name;
-    // TODO: find staff id by name in SQL, delete them
-    res.send(`OK, deleted ${name} from staff`) // or, depending on implementation, this can be a list of registered staff
+    let id = req.body.id;
+
+    connection.query({
+        sql : 'DELETE FROM staff WHERE id = "'+id+'"'
+    }, function (err){
+        if (err) throw err;
+        console.log("1 record deleted from staff");
+    });
+
+    res.send(`OK, deleted ${id} from staff`) // or, depending on implementation, this can be a list of registered staff
 })
 app.post('/staff_view', (req, res) => {
     // var name = req.body.name;
@@ -99,8 +106,10 @@ app.post('/staff_view', (req, res) => {
             answer += element.id + "|"
             answer += element.first_name + "|"
             answer += element.last_name + "|"
+            answer += element.phone_number + "|"
             answer += element.notes + "|"
         });
+
         res.send(answer)
         
 
@@ -144,9 +153,16 @@ app.post('/customer_change', (req, res) => {
 })
 
 app.post('/customer_del', (req, res) => {
-    var name = req.body.name;
-    // TODO: find customer id by name in SQL, delete them
-    res.send(`OK, deleted ${name} from customers`) // or, depending on implementation, this can be a list of registered customers 
+    let id = req.body.id;
+
+    connection.query({
+        sql : 'DELETE FROM customers WHERE id = "'+id+'"'
+    }, function (err){
+        if (err) throw err;
+        console.log("1 record deleted from customers");
+    });
+
+    res.send(`OK, deleted ${id} from customers`) // or, depending on implementation, this can be a list of registered customers
 })
 
 app.post('/customer_report', (req, res) => {
@@ -176,6 +192,24 @@ app.post('/customer_report', (req, res) => {
     res.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
 })
 
+app.post('/get_reports', (req, res) => {
+    let id = req.body.id;
+
+    connection.query({
+        sql : 'SELECT * FROM reports WHERE customer_id = "'+id+'"'
+    }, function (err, result){
+        if (err) throw err;
+        answer = ''
+        result.forEach(e => {
+            answer += e.id + '|'
+            answer += e.report + '|'
+        });
+        res.send(answer);
+    });
+
+
+})
+
 app.post('/customer_view', (req, res) => {
     // var name = req.body.name;
     //TODO: find customer id by name in SQL
@@ -193,6 +227,7 @@ app.post('/customer_view', (req, res) => {
             answer += element.id + "|"
             answer += element.first_name + "|"
             answer += element.last_name + "|"
+            answer += element.phone_number + "|"
             answer += element.notes + "|"
         });
         res.send(answer)
