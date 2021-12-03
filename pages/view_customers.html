@@ -53,7 +53,6 @@
 
                     let parsed = parseStringResponse(answer)
 
-
                     for (let i = 0; i < parsed.length; i++){
                         let table = document.getElementById("customerTable").insertRow()
 
@@ -76,13 +75,10 @@
                         cell6.innerHTML = '<button onclick=showReport("'+parsed[i].id+'")>View</button>'
 
                         let cell7 = table.insertCell()
-                        cell7.innerHTML = '<button>Change</button>'
+                        cell7.innerHTML = '<button onclick="window.location.href=\'/customers/change?id='+parsed[i].id+'&fname='+parsed[i].first_name+'&lname='+parsed[i].last_name+'&phonenumber='+parsed[i].phone_number+'&notes='+parsed[i].notes+'\'">Change</button>'
 
                         let cell8 = table.insertCell()
                         cell8.innerHTML = '<button onclick=deleteCustomer("'+parsed[i].id+'")>Delete</button>'
-
-
-
                     }
                 }
             };
@@ -201,7 +197,5 @@
             }
             return stage_two
         }
-
-
     </script>
 </html>

@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-<label>Add Staff</label>
+<head>
+    <meta charset="UTF-8">
+    <title>Modify Staff</title>
+</head>
+<body onload="renderData(); async ">
 
-
+<h1>Modify Staff</h1>
 
 <form>
-    <label for="fname">First name:</label><br>
+    <label id="ayy" for="fname">First name:</label><br>
     <input type="text" id="fname" name="fname"><br>
 
     <label for="lname">Last name:</label><br>
@@ -19,26 +23,39 @@
 </form>
 
 
-<button onclick="addStaff()">ADD</button>
+<button onclick="changeStaff()">OK</button>
 <button onclick="window.location.href='../staff'">BACK</button>
 
+</body>
 </html>
 
 <script>
-    function addStaff()
-    {
+    function renderData(){
+        let url = new URL(window.location.href);
+
+        document.getElementById('fname').value = url.searchParams.get('fname')
+        document.getElementById('lname').value = url.searchParams.get('lname')
+        document.getElementById('pNumber').value = url.searchParams.get('phonenumber')
+        document.getElementById('notes').value = url.searchParams.get('notes')
+    }
+
+    function changeStaff(){
+        if (!confirm('Are you sure you want to modify this person?')) {
+            return
+        }
 
         let http = new XMLHttpRequest();
-        let url = '/staff_reg';
-
+        let url = '/staff_change';
+        let id = 'id=' + new URL(window.location.href).searchParams.get('id');
         let firstName= 'firstName=' + document.getElementById("fname").value;
         let lastName= 'lastName=' + document.getElementById("lname").value;
         let phoneNumber= 'phoneNumber=' + document.getElementById("pNumber").value;
         let notes= 'notes=' + document.getElementById("notes").value;
 
         http.open('POST', url, true);
-
         http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+        http.send(id+'&'+lastName+'&'+firstName+'&'+phoneNumber+'&'+notes);
 
         http.onreadystatechange = function()
         {
@@ -46,15 +63,15 @@
             {
 
                 // document.getElementById("postBox").textContent();
-                alert("Staff Added!");
-                document.getElementById("response").value = http.responseText;
+                alert("Staff Modified!");
                 window.location.href='../staff'
             }
 
         };
 
-        http.send(lastName+'&'+firstName+'&'+phoneNumber+'&'+notes);
 
 
     }
+
+
 </script>

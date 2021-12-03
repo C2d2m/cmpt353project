@@ -40,6 +40,12 @@ app.get('/staff/add', (req, res) => {
 app.get('/customers/add', (req, res) => {
     res.sendFile('add_customer.html', { root: path.join(__dirname, './pages') });
 })
+app.get('/staff/change', (req, res) => {
+    res.sendFile('change_staff.html', { root: path.join(__dirname, './pages') });
+})
+app.get('/customers/change', (req, res) => {
+    res.sendFile('change_customer.html', { root: path.join(__dirname, './pages') });
+})
 app.get('/report', (req, res) => {
     res.sendFile('add_report.html', { root: path.join(__dirname, './pages') });
 })
@@ -76,14 +82,14 @@ app.post('/staff_change', (req, res) => {
 
     connection.query({
         sql : 'UPDATE staff' +
-            'set first_name = "'+fName+'", last_name = "'+lName+'", phone_number = "'+phoneNumber+'", notes = "'+notes+'"' +
+            ' SET first_name = "'+fName+'", last_name = "'+lName+'", phone_number = "'+phoneNumber+'", notes = "'+notes+'"' +
             'WHERE id = "'+id+'"'
     }, function (err){
         if (err) throw err;
         console.log("1 record updated in staff");
     });
 
-    res.send(`OK, changed ${name} to ${newName} for staff`) // or, depending on implementation, this can be a list of registered staff
+    res.send(`OK, record changed for staff ${id}`) // or, depending on implementation, this can be a list of registered staff
 })
 
 app.post('/staff_del', (req, res) => {
@@ -159,15 +165,15 @@ app.post('/customer_change', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
     connection.query({
-        sql : 'UPDATE customer' +
-            'set first_name = "'+fName+'", last_name = "'+lName+'", phone_number = "'+phoneNumber+'", notes = "'+notes+'"' +
+        sql : 'UPDATE customers' +
+            ' SET first_name = "'+fName+'", last_name = "'+lName+'", phone_number = "'+phoneNumber+'", notes = "'+notes+'"' +
             'WHERE id = "'+id+'"'
     }, function (err){
         if (err) throw err;
         console.log("1 record updated in customers");
     });
 
-    res.send(`OK, changed ${name} to ${newName} for customer`) // or, depending on implementation, this can be a list of registered customers
+    res.send(`OK, record changed for customer ${id}`) // or, depending on implementation, this can be a list of registered customers
 })
 
 app.post('/customer_del', (req, res) => {

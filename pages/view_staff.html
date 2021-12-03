@@ -71,7 +71,7 @@
                         cell5.innerText = parsed[i].notes
 
                         let cell6 = table.insertCell()
-                        cell6.innerHTML = '<button>Change</button>'
+                        cell6.innerHTML = '<button onclick="window.location.href=\'/staff/change?id='+parsed[i].id+'&fname='+parsed[i].first_name+'&lname='+parsed[i].last_name+'&phonenumber='+parsed[i].phone_number+'&notes='+parsed[i].notes+'\'">Change</button>'
 
                         let cell7 = table.insertCell()
                         cell7.innerHTML = '<button onclick=deleteStaff("'+parsed[i].id+'")>Delete</button>'
@@ -80,7 +80,7 @@
                     }
                 }
             };
-    
+
             http.send();
     
             // window.location.href='./'
