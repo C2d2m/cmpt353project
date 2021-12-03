@@ -71,9 +71,18 @@ app.post('/staff_reg', (req, res) => {
 })
 
 app.post('/staff_change', (req, res) => {
-    var name = req.body.name;
-    var newName = req.body.newName; // for example, change the name of some staff to a new name
-    // TODO: find staff id by name in SQL, change their name field
+    let id = req.body.id;
+    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+
+    connection.query({
+        sql : 'UPDATE staff' +
+            'set first_name = "'+fName+'", last_name = "'+lName+'", phone_number = "'+phoneNumber+'", notes = "'+notes+'"' +
+            'WHERE id = "'+id+'"'
+    }, function (err){
+        if (err) throw err;
+        console.log("1 record updated in staff");
+    });
+
     res.send(`OK, changed ${name} to ${newName} for staff`) // or, depending on implementation, this can be a list of registered staff
 })
 
@@ -146,9 +155,18 @@ app.post('/customer_reg', (req, res) => {
 })
 
 app.post('/customer_change', (req, res) => {
-    var name = req.body.name;
-    var newName = req.body.newName; // for example, change the name of some customer to a new name. 
-    // TODO: find customer id by name in SQL, change their name field
+    let id = req.body.id;
+    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+
+    connection.query({
+        sql : 'UPDATE customer' +
+            'set first_name = "'+fName+'", last_name = "'+lName+'", phone_number = "'+phoneNumber+'", notes = "'+notes+'"' +
+            'WHERE id = "'+id+'"'
+    }, function (err){
+        if (err) throw err;
+        console.log("1 record updated in customers");
+    });
+
     res.send(`OK, changed ${name} to ${newName} for customer`) // or, depending on implementation, this can be a list of registered customers
 })
 
