@@ -2,9 +2,11 @@
 const Koa = require('koa')
 const Router = require('koa-router')
 const app = new Koa();
+const fs = require('fs')
 const router = new Router();
-const bodyParser = require("body-parser");
 const mysql = require('mysql');
+const views = require('koa-views')
+const bodyParser = require('koa-bodyparser')
 
 // app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -22,6 +24,14 @@ const connection = mysql.createConnection({
 // required to avoid absolute pathing
 var path = require('path');
 
+
+app.use(views(path.join(__dirname, 'pages'), {extension: 'html'}));
+app.use(bodyParser());
+// render(app, {
+//     root: path.join(__dirname, 'pages'),
+//     viewExt: 'html'
+// })
+
 // Establish connection to the database
 connection.connect(function(err) {
     if (err) throw err;
@@ -29,34 +39,34 @@ connection.connect(function(err) {
 });
 
 // Load main page on startup
-router.get('/', (req, res) => {
-    res.sendFile('index.html', { root: path.join(__dirname, './pages') });
+router.get('/', async (ctx, next) => {
+    await ctx.render('index');
 });
 
 
 // as cool as the idea of a general page loader was, it was hard and ugly to even try to implement (trying to render a filestream).
 // Because it's simple I'll just implement GETs for each
 // The actual process of redirecting to these GETs is in the .html
-router.get('/staff/add', (req, res) => {
-    res.sendFile('add_staff.html', { root: path.join(__dirname, './pages') });
+router.get('/staff/add', async (ctx, next) => {
+    await ctx.render('add_staff');
 })
-router.get('/customers/add', (req, res) => {
-    res.sendFile('add_customer.html', { root: path.join(__dirname, './pages') });
+router.get('/customers/add', async (ctx, next) => {
+    await ctx.render('add_customer');
 })
-router.get('/staff/change', (req, res) => {
-    res.sendFile('change_staff.html', { root: path.join(__dirname, './pages') });
+router.get('/staff/change', async (ctx, next) => {
+    await ctx.render('change_staff');
 })
-router.get('/customers/change', (req, res) => {
-    res.sendFile('change_customer.html', { root: path.join(__dirname, './pages') });
+router.get('/customers/change', async (ctx, next) => {
+    await ctx.render('change_customer');
 })
-router.get('/report', (req, res) => {
-    res.sendFile('add_report.html', { root: path.join(__dirname, './pages') });
+router.get('/report', async (ctx, next) => {
+    await ctx.render('add_report');
 })
-router.get('/staff', (req, res) => {
-    res.sendFile('view_staff.html', { root: path.join(__dirname, './pages') });
+router.get('/staff', async (ctx, next) => {
+    await ctx.render('view_staff');
 })
-router.get('/customers', (req, res) => {
-    res.sendFile('view_customers.html', { root: path.join(__dirname, './pages') });
+router.get('/customers', async (ctx, next) => {
+    await ctx.render('view_customers');
 })
 
 
@@ -64,8 +74,8 @@ router.get('/customers', (req, res) => {
 // Some notes: _change posts will ideally take in all modifiable var (name, age, etc) and use a flag for values to be left unchanged (instead of new posts for changing each var)
 // staff
 
-router.post('/staff_reg', (req, res) => {
-    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+router.post('/staff_reg', async (ctx, next) => {
+    let fName = ctx.request.body.firstName, lName = ctx.request.body.lastName, phoneNumber = ctx.request.body.phoneNumber, notes = ctx.request.body.notes;
 
     // Inserting new Staff
     connection.query({
@@ -74,14 +84,11 @@ router.post('/staff_reg', (req, res) => {
         if (err) throw err;
         console.log("1 record inserted into staff");
     });
-
-
-    res.send(`OK, added ${fName} to staff`) // or, depending on implementation, this can be a list of registered staff with details
 })
 
-router.post('/staff_change', (req, res) => {
-    let id = req.body.id;
-    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+router.post('/staff_change', async (ctx, next) => {
+    let id = ctx.request.body.id;
+    let fName = ctx.request.body.firstName, lName = ctx.request.body.lastName, phoneNumber = ctx.request.body.phoneNumber, notes = ctx.request.body.notes;
 
     connection.query({
         sql : 'UPDATE staff' +
@@ -91,12 +98,10 @@ router.post('/staff_change', (req, res) => {
         if (err) throw err;
         console.log("1 record updated in staff");
     });
-
-    res.send(`OK, record changed for staff ${id}`) // or, depending on implementation, this can be a list of registered staff
 })
 
-router.post('/staff_del', (req, res) => {
-    let id = req.body.id;
+router.post('/staff_del', async (ctx, next) => {
+    let id = ctx.request.body.id;
 
     connection.query({
         sql : 'DELETE FROM staff WHERE id = "'+id+'"'
@@ -104,31 +109,46 @@ router.post('/staff_del', (req, res) => {
         if (err) throw err;
         console.log("1 record deleted from staff");
     });
-
-    res.send(`OK, deleted ${id} from staff`) // or, depending on implementation, this can be a list of registered staff
 })
-router.get('/staff_view', (req, res) => {
-    // var name = req.body.name;
+router.get('/staff_view', async (ctx, next) => {
+    // var name = ctx.request.body.name;
     //TODO: find customer id by name in SQL
     //      get details from that customer
     //      use id to get list of reports from report DB
     //      make gabe figure out how to return data in usable (parsable string?) format for .html
 
     //Query Database for customer id of a given first and last name
-    connection.query({
-        sql : 'SELECT * FROM staff'
-    }, function (err, result, fields) {
-        if (err) throw err;
-        answer = ''
-        result.forEach(element => {
-            answer += element.id + "|"
-            answer += element.first_name + "|"
-            answer += element.last_name + "|"
-            answer += element.phone_number + "|"
-            answer += element.notes + "|"
-        });
 
-        res.send(answer)
+    function evilPrimise() {
+        return new Promise(function(resolve, reject) {
+            connection.query({
+                sql : 'SELECT * FROM staff'
+            }, async function (err, result, fields) {
+                if (err) throw err;
+        
+                answer = ''
+                result.forEach(element => {
+                    answer += element.id + "|"
+                    answer += element.first_name + "|"
+                    answer += element.last_name + "|"
+                    answer += element.phone_number + "|"
+                    answer += element.notes + "|"
+                });
+                resolve(answer)
+                
+                });
+
+        })
+    }
+    ctx.response.body = await evilPrimise();
+    ctx.status = 200;
+
+    
+
+    
+        
+
+        
         
 
         // let row = result[key];
@@ -142,15 +162,15 @@ router.get('/staff_view', (req, res) => {
             //     console.log("1 record inserted into records");
             // });
 
-    });
+    // });
 
     // res.send(`OK, here is ${name}'s details`) // this will eventually be readable data
 })
 
 
 // customers
-router.post('/customer_reg', (req, res) => {
-    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+router.post('/customer_reg', async (ctx, next) => {
+    let fName = ctx.request.body.firstName, lName = ctx.request.body.lastName, phoneNumber = ctx.request.body.phoneNumber, notes = ctx.request.body.notes;
 
     // Inserting new Customer
     connection.query({
@@ -159,13 +179,11 @@ router.post('/customer_reg', (req, res) => {
         if (err) throw err;
         console.log("1 record inserted int customers");
     });
-
-    res.send(`OK, added ${fName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
 })
 
-router.post('/customer_change', (req, res) => {
-    let id = req.body.id;
-    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+router.post('/customer_change', async (ctx, next) => {
+    let id = ctx.request.body.id;
+    let fName = ctx.request.body.firstName, lName = ctx.request.body.lastName, phoneNumber = ctx.request.body.phoneNumber, notes = ctx.request.body.notes;
 
     connection.query({
         sql : 'UPDATE customers' +
@@ -175,12 +193,10 @@ router.post('/customer_change', (req, res) => {
         if (err) throw err;
         console.log("1 record updated in customers");
     });
-
-    res.send(`OK, record changed for customer ${id}`) // or, depending on implementation, this can be a list of registered customers
 })
 
-router.post('/customer_del', (req, res) => {
-    let id = req.body.id;
+router.post('/customer_del', async (ctx, next) => {
+    let id = ctx.request.body.id;
 
     connection.query({
         sql : 'DELETE FROM customers WHERE id = "'+id+'"'
@@ -188,12 +204,10 @@ router.post('/customer_del', (req, res) => {
         if (err) throw err;
         console.log("1 record deleted from customers");
     });
-
-    res.send(`OK, deleted ${id} from customers`) // or, depending on implementation, this can be a list of registered customers
 })
 
-router.post('/customer_report', (req, res) => {
-    let fName = req.body.firstName, lName = req.body.lastName, report = req.body.report;
+router.post('/customer_report', async (ctx, next) => {
+    let fName = ctx.request.body.firstName, lName = ctx.request.body.lastName, report = ctx.request.body.report;
 
     //Query Database for customer id of a given first and last name
     connection.query({
@@ -215,49 +229,79 @@ router.post('/customer_report', (req, res) => {
             });
         });
     });
-
-    res.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
 })
 
-router.get('/get_reports', (req, res) => {
-    let id = req.body.id;
+router.get('/get_reports', async (ctx, next) => {
+    let id = ctx.request.body.id;
 
-    connection.query({
-        sql : 'SELECT * FROM reports WHERE customer_id = "'+id+'"'
-    }, function (err, result){
-        if (err) throw err;
-        answer = ''
-        result.forEach(e => {
-            answer += e.id + '|'
-            answer += e.report + '|'
-        });
-        res.send(answer);
-    });
+    function evilPrimise() {
+        return new Promise(function(resolve, reject) {
+            connection.query({
+                sql : 'SELECT * FROM reports WHERE customer_id = "'+id+'"'
+            }, async function (err, result, fields) {
+                if (err) throw err;
+        
+                answer = ''
+                result.forEach(e => {
+                    answer += e.id + '|'
+                    answer += e.report + '|'
+                });
+                resolve(answer)
+                
+                });
+
+        })
+    }
+    ctx.response.body = await evilPrimise();
+    ctx.status = 200;
+
+    // connection.query({
+    //     sql : 'SELECT * FROM reports WHERE customer_id = "'+id+'"'
+    // }, function (err, result){
+    //     if (err) throw err;
+    //     answer = ''
+    //     result.forEach(e => {
+    //         answer += e.id + '|'
+    //         answer += e.report + '|'
+    //     });
+    //     ctx.body=(answer);
+    // });
 
 
 })
 
-router.get('/customer_view', (req, res) => {
-    // var name = req.body.name;
+router.get('/customer_view', async (ctx, next) => {
+    // var name = ctx.request.body.name;
     //TODO: find customer id by name in SQL
     //      get details from that customer
     //      use id to get list of reports from report DB
     //      make gabe figure out how to return data in usable (parsable string?) format for .html
 
     //Query Database for customer id of a given first and last name
-    connection.query({
-        sql : 'SELECT * FROM customers'
-    }, function (err, result, fields) {
-        if (err) throw err;
-        answer = ''
-        result.forEach(element => {
-            answer += element.id + "|"
-            answer += element.first_name + "|"
-            answer += element.last_name + "|"
-            answer += element.phone_number + "|"
-            answer += element.notes + "|"
-        });
-        res.send(answer)
+
+    function evilPrimise() {
+        return new Promise(function(resolve, reject) {
+            connection.query({
+                sql : 'SELECT * FROM customers'
+            }, async function (err, result, fields) {
+                if (err) throw err;
+        
+                answer = ''
+                result.forEach(element => {
+                    answer += element.id + "|"
+                    answer += element.first_name + "|"
+                    answer += element.last_name + "|"
+                    answer += element.phone_number + "|"
+                    answer += element.notes + "|"
+                });
+                resolve(answer)
+                
+                });
+
+        })
+    }
+    ctx.response.body = await evilPrimise();
+    ctx.status = 200;
         
 
         // let row = result[key];
@@ -274,7 +318,6 @@ router.get('/customer_view', (req, res) => {
     });
 
     // res.send(`OK, here is ${name}'s details`) // this will eventually be readable data
-})
 
 
 

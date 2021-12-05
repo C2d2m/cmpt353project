@@ -24,7 +24,7 @@
 
 
 <button onclick="changeCustomer()">OK</button>
-<button onclick="window.location.href='../customer'">BACK</button>
+<button onclick="window.location.href='../customers'">BACK</button>
 
 </body>
 </html>
@@ -59,13 +59,15 @@
 
         http.onreadystatechange = function()
         {
+            
             if(http.readyState == 4 && http.status == 200)
             {
-
-                // document.getElementById("postBox").textContent();
                 alert("Customer Modified!");
-                window.location.href='../customers'
+                // document.getElementById("postBox").textContent();
+               
+                
             }
+            window.location.href='../customers'
 
         };
     }
