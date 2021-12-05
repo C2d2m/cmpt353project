@@ -233,7 +233,7 @@ app.post('/customer_report', (req, res) => {
     res.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
 })
 
-app.get('/get_reports', (req, res) => {
+app.post('/get_reports', (req, res) => {
     let id = req.body.id;
     let sql = 'SELECT * FROM reports WHERE customer_id = "'+id+'"';
 
