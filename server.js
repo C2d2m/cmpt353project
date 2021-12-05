@@ -1,9 +1,12 @@
-const express = require('express');
-const app = express();
+// const express = require('express');
+const Koa = require('koa')
+const Router = require('koa-router')
+const app = new Koa();
+const router = new Router();
 const bodyParser = require("body-parser");
 const mysql = require('mysql');
 
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 const PORT = 8080;
 const HOST = "127.0.0.1";
@@ -26,7 +29,7 @@ connection.connect(function(err) {
 });
 
 // Load main page on startup
-app.get('/', (req, res) => {
+router.get('/', (req, res) => {
     res.sendFile('index.html', { root: path.join(__dirname, './pages') });
 });
 
@@ -34,25 +37,25 @@ app.get('/', (req, res) => {
 // as cool as the idea of a general page loader was, it was hard and ugly to even try to implement (trying to render a filestream).
 // Because it's simple I'll just implement GETs for each
 // The actual process of redirecting to these GETs is in the .html
-app.get('/staff/add', (req, res) => {
+router.get('/staff/add', (req, res) => {
     res.sendFile('add_staff.html', { root: path.join(__dirname, './pages') });
 })
-app.get('/customers/add', (req, res) => {
+router.get('/customers/add', (req, res) => {
     res.sendFile('add_customer.html', { root: path.join(__dirname, './pages') });
 })
-app.get('/staff/change', (req, res) => {
+router.get('/staff/change', (req, res) => {
     res.sendFile('change_staff.html', { root: path.join(__dirname, './pages') });
 })
-app.get('/customers/change', (req, res) => {
+router.get('/customers/change', (req, res) => {
     res.sendFile('change_customer.html', { root: path.join(__dirname, './pages') });
 })
-app.get('/report', (req, res) => {
+router.get('/report', (req, res) => {
     res.sendFile('add_report.html', { root: path.join(__dirname, './pages') });
 })
-app.get('/staff', (req, res) => {
+router.get('/staff', (req, res) => {
     res.sendFile('view_staff.html', { root: path.join(__dirname, './pages') });
 })
-app.get('/customers', (req, res) => {
+router.get('/customers', (req, res) => {
     res.sendFile('view_customers.html', { root: path.join(__dirname, './pages') });
 })
 
@@ -61,7 +64,7 @@ app.get('/customers', (req, res) => {
 // Some notes: _change posts will ideally take in all modifiable var (name, age, etc) and use a flag for values to be left unchanged (instead of new posts for changing each var)
 // staff
 
-app.post('/staff_reg', (req, res) => {
+router.post('/staff_reg', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
     // Inserting new Staff
@@ -76,7 +79,7 @@ app.post('/staff_reg', (req, res) => {
     res.send(`OK, added ${fName} to staff`) // or, depending on implementation, this can be a list of registered staff with details
 })
 
-app.post('/staff_change', (req, res) => {
+router.post('/staff_change', (req, res) => {
     let id = req.body.id;
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
@@ -92,7 +95,7 @@ app.post('/staff_change', (req, res) => {
     res.send(`OK, record changed for staff ${id}`) // or, depending on implementation, this can be a list of registered staff
 })
 
-app.post('/staff_del', (req, res) => {
+router.post('/staff_del', (req, res) => {
     let id = req.body.id;
 
     connection.query({
@@ -104,7 +107,7 @@ app.post('/staff_del', (req, res) => {
 
     res.send(`OK, deleted ${id} from staff`) // or, depending on implementation, this can be a list of registered staff
 })
-app.get('/staff_view', (req, res) => {
+router.get('/staff_view', (req, res) => {
     // var name = req.body.name;
     //TODO: find customer id by name in SQL
     //      get details from that customer
@@ -146,7 +149,7 @@ app.get('/staff_view', (req, res) => {
 
 
 // customers
-app.post('/customer_reg', (req, res) => {
+router.post('/customer_reg', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
     // Inserting new Customer
@@ -160,7 +163,7 @@ app.post('/customer_reg', (req, res) => {
     res.send(`OK, added ${fName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
 })
 
-app.post('/customer_change', (req, res) => {
+router.post('/customer_change', (req, res) => {
     let id = req.body.id;
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
@@ -176,7 +179,7 @@ app.post('/customer_change', (req, res) => {
     res.send(`OK, record changed for customer ${id}`) // or, depending on implementation, this can be a list of registered customers
 })
 
-app.post('/customer_del', (req, res) => {
+router.post('/customer_del', (req, res) => {
     let id = req.body.id;
 
     connection.query({
@@ -189,7 +192,7 @@ app.post('/customer_del', (req, res) => {
     res.send(`OK, deleted ${id} from customers`) // or, depending on implementation, this can be a list of registered customers
 })
 
-app.post('/customer_report', (req, res) => {
+router.post('/customer_report', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, report = req.body.report;
 
     //Query Database for customer id of a given first and last name
@@ -216,7 +219,7 @@ app.post('/customer_report', (req, res) => {
     res.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
 })
 
-app.get('/get_reports', (req, res) => {
+router.get('/get_reports', (req, res) => {
     let id = req.body.id;
 
     connection.query({
@@ -234,7 +237,7 @@ app.get('/get_reports', (req, res) => {
 
 })
 
-app.get('/customer_view', (req, res) => {
+router.get('/customer_view', (req, res) => {
     // var name = req.body.name;
     //TODO: find customer id by name in SQL
     //      get details from that customer
@@ -278,7 +281,7 @@ app.get('/customer_view', (req, res) => {
 
 
 // I don't know what this does but I have it from a previous assignment. Commenting it out doesn't seem to affect anything
-app.use('/', express.static('pages'));
+app.use(router.routes());
 
 
 app.listen(PORT,HOST, (err) => {
