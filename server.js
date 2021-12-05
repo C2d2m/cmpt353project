@@ -3,6 +3,21 @@ const app = express();
 const bodyParser = require("body-parser");
 const mysql = require('mysql');
 
+const loadtest = require('loadtest');
+
+const options = {
+    url: 'http://localhost:8080/customer_report',
+    maxRequests: 100000,
+    concurrency: 2,
+    method: 'POST',
+    contentType: 'application/x-www-form-urlencoded',
+    body: {
+        firstName: 'Caleb',
+        lastName: 'Milo',
+        report: 'Has a pet cat'
+    }
+};
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const PORT = 8080;
@@ -105,11 +120,6 @@ app.post('/staff_del', (req, res) => {
     res.send(`OK, deleted ${id} from staff`) // or, depending on implementation, this can be a list of registered staff
 })
 app.get('/staff_view', (req, res) => {
-    // var name = req.body.name;
-    //TODO: find customer id by name in SQL
-    //      get details from that customer
-    //      use id to get list of reports from report DB
-    //      make gabe figure out how to return data in usable (parsable string?) format for .html
 
     //Query Database for customer id of a given first and last name
     connection.query({
@@ -235,11 +245,6 @@ app.get('/get_reports', (req, res) => {
 })
 
 app.get('/customer_view', (req, res) => {
-    // var name = req.body.name;
-    //TODO: find customer id by name in SQL
-    //      get details from that customer
-    //      use id to get list of reports from report DB
-    //      make gabe figure out how to return data in usable (parsable string?) format for .html
 
     //Query Database for customer id of a given first and last name
     connection.query({
@@ -269,8 +274,6 @@ app.get('/customer_view', (req, res) => {
             // });
 
     });
-
-    // res.send(`OK, here is ${name}'s details`) // this will eventually be readable data
 })
 
 
@@ -289,3 +292,24 @@ app.listen(PORT,HOST, (err) => {
         console.log(`listening on ${HOST}:${PORT}`)
     }
 })
+
+fs = require('fs');
+
+loadtest.loadTest(options, function(error, result)
+{
+    if (error)
+    {
+        return console.error('Got an error: %s', error);
+    }
+    let data = ''
+    data += "RPS: "+ result.rps + '\n'
+    data += "Total Time: "+ result.totalTimeSeconds + '\n'
+    data += 'Mean Latency: ' + result.meanLatencyMs + '\n'
+    data += 'Max Latency: ' + result.maxLatencyMs + '\n'
+    data += 'Total Errors: ' + result.totalErrors
+
+    fs.writeFile('out.txt', data, function (err){
+
+    })
+
+});
