@@ -1,9 +1,12 @@
 const express = require('express');
-const app = express();
+const fastify = require('fastify');
+const fs = require('fs');
+const app = fastify();
+app.register(require('fastify-formbody'))
 const bodyParser = require("body-parser");
 const mysql = require('mysql');
 
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 const PORT = 8080;
 const HOST = "127.0.0.1";
@@ -26,34 +29,42 @@ connection.connect(function(err) {
 });
 
 // Load main page on startup
-app.get('/', (req, res) => {
-    res.sendFile('index.html', { root: path.join(__dirname, './pages') });
+app.get('/', async (request, reply) => {
+    const stream = fs.createReadStream('./pages/index.html')
+    reply.type('text/html').send(stream)
 });
 
 
 // as cool as the idea of a general page loader was, it was hard and ugly to even try to implement (trying to render a filestream).
 // Because it's simple I'll just implement GETs for each
 // The actual process of redirecting to these GETs is in the .html
-app.get('/staff/add', (req, res) => {
-    res.sendFile('add_staff.html', { root: path.join(__dirname, './pages') });
+app.get('/staff/add', async (request, reply) => {
+    const stream = fs.createReadStream('./pages/add_staff.html')
+    reply.type('text/html').send(stream)
 })
-app.get('/customers/add', (req, res) => {
-    res.sendFile('add_customer.html', { root: path.join(__dirname, './pages') });
+app.get('/customers/add', async (request, reply) => {
+    const stream = fs.createReadStream('./pages/add_customer.html')
+    reply.type('text/html').send(stream)
 })
-app.get('/staff/change', (req, res) => {
-    res.sendFile('change_staff.html', { root: path.join(__dirname, './pages') });
+app.get('/staff/change', async (request, reply) => {
+    const stream = fs.createReadStream('./pages/change_staff.html')
+    reply.type('text/html').send(stream)
 })
-app.get('/customers/change', (req, res) => {
-    res.sendFile('change_customer.html', { root: path.join(__dirname, './pages') });
+app.get('/customers/change', async (request, reply) => {
+    const stream = fs.createReadStream('./pages/change_customer.html')
+    reply.type('text/html').send(stream)
 })
-app.get('/report', (req, res) => {
-    res.sendFile('add_report.html', { root: path.join(__dirname, './pages') });
+app.get('/report', async (request, reply) => {
+    const stream = fs.createReadStream('./pages/add_report.html')
+    reply.type('text/html').send(stream)
 })
-app.get('/staff', (req, res) => {
-    res.sendFile('view_staff.html', { root: path.join(__dirname, './pages') });
+app.get('/staff', async (request, reply) => {
+    const stream = fs.createReadStream('./pages/view_staff.html')
+    reply.type('text/html').send(stream)
 })
-app.get('/customers', (req, res) => {
-    res.sendFile('view_customers.html', { root: path.join(__dirname, './pages') });
+app.get('/customers', async (request, reply) => {
+    const stream = fs.createReadStream('./pages/view_customers.html')
+    reply.type('text/html').send(stream)
 })
 
 
@@ -61,8 +72,8 @@ app.get('/customers', (req, res) => {
 // Some notes: _change posts will ideally take in all modifiable var (name, age, etc) and use a flag for values to be left unchanged (instead of new posts for changing each var)
 // staff
 
-app.post('/staff_reg', (req, res) => {
-    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+app.post('/staff_reg', async (request, reply) => {
+    let fName = request.body.firstName, lName = request.body.lastName, phoneNumber = request.body.phoneNumber, notes = request.body.notes;
 
     // Inserting new Staff
     connection.query({
@@ -73,12 +84,12 @@ app.post('/staff_reg', (req, res) => {
     });
 
 
-    res.send(`OK, added ${fName} to staff`) // or, depending on implementation, this can be a list of registered staff with details
+    reply.send(`OK, added ${fName} to staff`) // or, depending on implementation, this can be a list of registered staff with details
 })
 
-app.post('/staff_change', (req, res) => {
-    let id = req.body.id;
-    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+app.post('/staff_change', async (request, reply) => {
+    let id = request.body.id;
+    let fName = request.body.firstName, lName = request.body.lastName, phoneNumber = request.body.phoneNumber, notes = request.body.notes;
 
     connection.query({
         sql : 'UPDATE staff' +
@@ -89,11 +100,11 @@ app.post('/staff_change', (req, res) => {
         console.log("1 record updated in staff");
     });
 
-    res.send(`OK, record changed for staff ${id}`) // or, depending on implementation, this can be a list of registered staff
+    reply.send(`OK, record changed for staff ${id}`) // or, depending on implementation, this can be a list of registered staff
 })
 
-app.post('/staff_del', (req, res) => {
-    let id = req.body.id;
+app.post('/staff_del', async (request, reply) => {
+    let id = request.body.id;
 
     connection.query({
         sql : 'DELETE FROM staff WHERE id = "'+id+'"'
@@ -102,10 +113,10 @@ app.post('/staff_del', (req, res) => {
         console.log("1 record deleted from staff");
     });
 
-    res.send(`OK, deleted ${id} from staff`) // or, depending on implementation, this can be a list of registered staff
+    reply.send(`OK, deleted ${id} from staff`) // or, depending on implementation, this can be a list of registered staff
 })
-app.get('/staff_view', (req, res) => {
-    // var name = req.body.name;
+app.get('/staff_view', async (request, reply) => {
+    // var name = request.body.name;
     //TODO: find customer id by name in SQL
     //      get details from that customer
     //      use id to get list of reports from report DB
@@ -125,7 +136,7 @@ app.get('/staff_view', (req, res) => {
             answer += element.notes + "|"
         });
 
-        res.send(answer)
+        reply.send(answer)
         
 
         // let row = result[key];
@@ -141,14 +152,14 @@ app.get('/staff_view', (req, res) => {
 
     });
 
-    // res.send(`OK, here is ${name}'s details`) // this will eventually be readable data
+    // reply.send(`OK, here is ${name}'s details`) // this will eventually be readable data
 })
 
 
 // customers
-app.post('/customer_reg', (req, res) => {
-    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
-
+app.post('/customer_reg', async (request, reply) => {
+    console.log('cmon now')
+    let fName = request.body.firstName, lName = request.body.lastName, phoneNumber = request.body.phoneNumber, notes = request.body.notes;
     // Inserting new Customer
     connection.query({
         sql : 'INSERT INTO customers (last_name, first_name, phone_number, notes) VALUES ("'+lName+'", "'+fName+'", "'+phoneNumber+'", "'+notes+'")'
@@ -157,12 +168,12 @@ app.post('/customer_reg', (req, res) => {
         console.log("1 record inserted int customers");
     });
 
-    res.send(`OK, added ${fName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
+     return (`OK, added ${fName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
 })
 
-app.post('/customer_change', (req, res) => {
-    let id = req.body.id;
-    let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+app.post('/customer_change', async (request, reply) => {
+    let id = request.body.id;
+    let fName = request.body.firstName, lName = request.body.lastName, phoneNumber = request.body.phoneNumber, notes = request.body.notes;
 
     connection.query({
         sql : 'UPDATE customers' +
@@ -173,11 +184,11 @@ app.post('/customer_change', (req, res) => {
         console.log("1 record updated in customers");
     });
 
-    res.send(`OK, record changed for customer ${id}`) // or, depending on implementation, this can be a list of registered customers
+    reply.send(`OK, record changed for customer ${id}`) // or, depending on implementation, this can be a list of registered customers
 })
 
-app.post('/customer_del', (req, res) => {
-    let id = req.body.id;
+app.post('/customer_del', async (request, reply) => {
+    let id = request.body.id;
 
     connection.query({
         sql : 'DELETE FROM customers WHERE id = "'+id+'"'
@@ -186,11 +197,11 @@ app.post('/customer_del', (req, res) => {
         console.log("1 record deleted from customers");
     });
 
-    res.send(`OK, deleted ${id} from customers`) // or, depending on implementation, this can be a list of registered customers
+    reply.send(`OK, deleted ${id} from customers`) // or, depending on implementation, this can be a list of registered customers
 })
 
-app.post('/customer_report', (req, res) => {
-    let fName = req.body.firstName, lName = req.body.lastName, report = req.body.report;
+app.post('/customer_report', async (request, reply) => {
+    let fName = request.body.firstName, lName = request.body.lastName, report = request.body.report;
 
     //Query Database for customer id of a given first and last name
     connection.query({
@@ -213,11 +224,11 @@ app.post('/customer_report', (req, res) => {
         });
     });
 
-    res.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
+    reply.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
 })
 
-app.get('/get_reports', (req, res) => {
-    let id = req.body.id;
+app.get('/get_reports', async (request, reply) => {
+    let id = request.body.id;
 
     connection.query({
         sql : 'SELECT * FROM reports WHERE customer_id = "'+id+'"'
@@ -228,14 +239,14 @@ app.get('/get_reports', (req, res) => {
             answer += e.id + '|'
             answer += e.report + '|'
         });
-        res.send(answer);
+        reply.send(answer);
     });
 
 
 })
 
-app.get('/customer_view', (req, res) => {
-    // var name = req.body.name;
+app.get('/customer_view', async (request, reply) => {
+    // var name = request.body.name;
     //TODO: find customer id by name in SQL
     //      get details from that customer
     //      use id to get list of reports from report DB
@@ -254,7 +265,7 @@ app.get('/customer_view', (req, res) => {
             answer += element.phone_number + "|"
             answer += element.notes + "|"
         });
-        res.send(answer)
+        reply.send(answer)
         
 
         // let row = result[key];
@@ -270,7 +281,7 @@ app.get('/customer_view', (req, res) => {
 
     });
 
-    // res.send(`OK, here is ${name}'s details`) // this will eventually be readable data
+    // reply.send(`OK, here is ${name}'s details`) // this will eventually be readable data
 })
 
 
@@ -278,7 +289,7 @@ app.get('/customer_view', (req, res) => {
 
 
 // I don't know what this does but I have it from a previous assignment. Commenting it out doesn't seem to affect anything
-app.use('/', express.static('pages'));
+// app.use('/', express.static('pages'));
 
 
 app.listen(PORT,HOST, (err) => {
