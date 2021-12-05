@@ -1,13 +1,13 @@
 const express = require('express');
 const app = express();
 const bodyParser = require("body-parser");
-const mysql = require('mysql');
+const sqlite3 = require('sqlite3').verbose();
 
 const loadtest = require('loadtest');
 
 const options = {
     url: 'http://localhost:8080/customer_report',
-    maxRequests: 100000,
+    maxRequests: 0,
     concurrency: 2,
     method: 'POST',
     contentType: 'application/x-www-form-urlencoded',
@@ -24,21 +24,33 @@ const PORT = 8080;
 const HOST = "127.0.0.1";
 
 // MYSQL Database connection info, can be updated depending on how we want to host/ test
-const connection = mysql.createConnection({
-    host        :   'localhost',
-    user        :   'root',
-    password    :   'cmpt353password',
-    database    :   'project'
-})
+let db = new sqlite3.Database(':memory:', (err) => {
+    if (err) {
+        return console.error(err.message);
+    }
+    console.log('Connected to the in-memory SQlite database.');
+});
+
+db.serialize(() => {
+    let sql = 'CREATE TABLE IF NOT EXISTS staff (' +
+        'id INTEGER NOT NULL PRIMARY KEY, last_name TEXT NOT NULL, first_name TEXT NOT NULL, phone_number TEXT NOT NULL,' +
+        ' notes TEXT NOT NULL);'
+    db.run(sql);
+
+    sql = 'CREATE TABLE IF NOT EXISTS customers (' +
+        'id INTEGER NOT NULL PRIMARY KEY, last_name TEXT NOT NULL, first_name TEXT NOT NULL, phone_number TEXT NOT NULL,' +
+        ' notes TEXT NOT NULL);'
+    db.run(sql);
+
+    sql = 'CREATE TABLE IF NOT EXISTS reports (' +
+        'id INTEGER NOT NULL PRIMARY KEY, customer_id INTEGER NOT NULL, report TEXT NOT NULL);'
+    db.run(sql);
+});
+
 
 // required to avoid absolute pathing
-var path = require('path');
+let path = require('path');
 
-// Establish connection to the database
-connection.connect(function(err) {
-    if (err) throw err;
-    console.log('connected as id ' + connection.threadId);
-});
 
 // Load main page on startup
 app.get('/', (req, res) => {
@@ -78,11 +90,10 @@ app.get('/customers', (req, res) => {
 
 app.post('/staff_reg', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+    let sql = 'INSERT INTO staff (last_name, first_name, phone_number, notes) VALUES ("'+lName+'", "'+fName+'", "'+phoneNumber+'", "'+notes+'")'
 
     // Inserting new Staff
-    connection.query({
-        sql : 'INSERT INTO staff (last_name, first_name, phone_number, notes) VALUES ("'+lName+'", "'+fName+'", "'+phoneNumber+'", "'+notes+'")'
-    }, function (err){
+    db.run( sql, (err) =>{
         if (err) throw err;
         console.log("1 record inserted into staff");
     });
@@ -95,11 +106,11 @@ app.post('/staff_change', (req, res) => {
     let id = req.body.id;
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
-    connection.query({
-        sql : 'UPDATE staff' +
-            ' SET first_name = "'+fName+'", last_name = "'+lName+'", phone_number = "'+phoneNumber+'", notes = "'+notes+'"' +
-            'WHERE id = "'+id+'"'
-    }, function (err){
+    let sql = 'UPDATE staff' +
+        ' SET first_name = "'+fName+'", last_name = "'+lName+'", phone_number = "'+phoneNumber+'", notes = "'+notes+'"' +
+        'WHERE id = "'+id+'"';
+
+    db.run(sql, (err) => {
         if (err) throw err;
         console.log("1 record updated in staff");
     });
@@ -109,10 +120,9 @@ app.post('/staff_change', (req, res) => {
 
 app.post('/staff_del', (req, res) => {
     let id = req.body.id;
+    let sql = 'DELETE FROM staff WHERE id = "'+id+'"';
 
-    connection.query({
-        sql : 'DELETE FROM staff WHERE id = "'+id+'"'
-    }, function (err){
+    db.run(sql, (err) => {
         if (err) throw err;
         console.log("1 record deleted from staff");
     });
@@ -122,17 +132,16 @@ app.post('/staff_del', (req, res) => {
 app.get('/staff_view', (req, res) => {
 
     //Query Database for customer id of a given first and last name
-    connection.query({
-        sql : 'SELECT * FROM staff'
-    }, function (err, result, fields) {
+    db.all( 'SELECT * FROM staff', [], (err, rows) =>{
         if (err) throw err;
+
         answer = ''
-        result.forEach(element => {
-            answer += element.id + "|"
-            answer += element.first_name + "|"
-            answer += element.last_name + "|"
-            answer += element.phone_number + "|"
-            answer += element.notes + "|"
+        rows.forEach((row) => {
+            answer += row.id + "|"
+            answer += row.first_name + "|"
+            answer += row.last_name + "|"
+            answer += row.phone_number + "|"
+            answer += row.notes + "|"
         });
 
         res.send(answer)
@@ -158,13 +167,12 @@ app.get('/staff_view', (req, res) => {
 // customers
 app.post('/customer_reg', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
+    let sql = 'INSERT INTO customers (last_name, first_name, phone_number, notes) VALUES ("'+lName+'", "'+fName+'", "'+phoneNumber+'", "'+notes+'")'
 
-    // Inserting new Customer
-    connection.query({
-        sql : 'INSERT INTO customers (last_name, first_name, phone_number, notes) VALUES ("'+lName+'", "'+fName+'", "'+phoneNumber+'", "'+notes+'")'
-    }, function (err){
+    // Inserting new customer
+    db.run(sql, (err) =>{
         if (err) throw err;
-        console.log("1 record inserted int customers");
+        console.log("1 record inserted into customers");
     });
 
     res.send(`OK, added ${fName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
@@ -174,11 +182,11 @@ app.post('/customer_change', (req, res) => {
     let id = req.body.id;
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
-    connection.query({
-        sql : 'UPDATE customers' +
-            ' SET first_name = "'+fName+'", last_name = "'+lName+'", phone_number = "'+phoneNumber+'", notes = "'+notes+'"' +
-            'WHERE id = "'+id+'"'
-    }, function (err){
+    let sql = 'UPDATE customers' +
+        ' SET first_name = "'+fName+'", last_name = "'+lName+'", phone_number = "'+phoneNumber+'", notes = "'+notes+'"' +
+        'WHERE id = "'+id+'"';
+
+    db.run(sql, (err) => {
         if (err) throw err;
         console.log("1 record updated in customers");
     });
@@ -189,9 +197,9 @@ app.post('/customer_change', (req, res) => {
 app.post('/customer_del', (req, res) => {
     let id = req.body.id;
 
-    connection.query({
-        sql : 'DELETE FROM customers WHERE id = "'+id+'"'
-    }, function (err){
+    let sql = 'DELETE FROM customers WHERE id = "'+id+'"';
+
+    db.run(sql, (err) => {
         if (err) throw err;
         console.log("1 record deleted from customers");
     });
@@ -202,19 +210,18 @@ app.post('/customer_del', (req, res) => {
 app.post('/customer_report', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, report = req.body.report;
 
+    let sql = 'SELECT * FROM customers WHERE last_Name = "'+lName+'" AND first_name = "'+fName+'"';
+
     //Query Database for customer id of a given first and last name
-    connection.query({
-        sql : 'SELECT * FROM customers WHERE last_Name = "'+lName+'" AND first_name = "'+fName+'"'
-    }, function (err, result, fields) {
+    db.all(sql, [], (err, rows ) =>{
         if (err) throw err;
 
         // Organize data from query
-        Object.keys(result).forEach(function(key) {
-            let row = result[key];
+        rows.forEach((row) => {
             let customerID = row.id
 
             // Add the report into reports with the customers id
-            connection.query({
+            db.run({
                 sql : 'INSERT INTO reports (customer_id, report) VALUES ("'+customerID+'", "'+report+'")'
             }, function (err, result, fields) {
                 if (err) throw err;
@@ -228,15 +235,15 @@ app.post('/customer_report', (req, res) => {
 
 app.get('/get_reports', (req, res) => {
     let id = req.body.id;
+    let sql = 'SELECT * FROM reports WHERE customer_id = "'+id+'"';
 
-    connection.query({
-        sql : 'SELECT * FROM reports WHERE customer_id = "'+id+'"'
-    }, function (err, result){
+    db.all(sql, [], (err, rows) => {
         if (err) throw err;
-        answer = ''
-        result.forEach(e => {
-            answer += e.id + '|'
-            answer += e.report + '|'
+
+        let answer = ''
+        rows.forEach(row => {
+            answer += row.id + '|'
+            answer += row.report + '|'
         });
         res.send(answer);
     });
@@ -247,18 +254,18 @@ app.get('/get_reports', (req, res) => {
 app.get('/customer_view', (req, res) => {
 
     //Query Database for customer id of a given first and last name
-    connection.query({
-        sql : 'SELECT * FROM customers'
-    }, function (err, result, fields) {
+    db.all( 'SELECT * FROM customers', [], (err, rows) =>{
         if (err) throw err;
+
         answer = ''
-        result.forEach(element => {
-            answer += element.id + "|"
-            answer += element.first_name + "|"
-            answer += element.last_name + "|"
-            answer += element.phone_number + "|"
-            answer += element.notes + "|"
+        rows.forEach((row) => {
+            answer += row.id + "|"
+            answer += row.first_name + "|"
+            answer += row.last_name + "|"
+            answer += row.phone_number + "|"
+            answer += row.notes + "|"
         });
+
         res.send(answer)
         
 
@@ -310,6 +317,6 @@ loadtest.loadTest(options, function(error, result)
 
     fs.writeFile('out.txt', data, function (err){
 
-    })
+    });
 
 });
