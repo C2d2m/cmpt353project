@@ -2,8 +2,7 @@ const fastify = require('fastify');
 const fs = require('fs');
 const app = fastify();
 const mysql = require('mysql');
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
+const crypto = require('crypto');
 
 app.register(require('fastify-cookie'), {
     secret : 'test-secret',
@@ -111,14 +110,18 @@ app.post('/login', async (request, reply) => {
         return;
     }
 
+    let passwordHash = crypto.createHash('md5').update(password).digest('hex')
+
     connection.query({
         sql : 'SELECT * FROM login WHERE user_name = "'+userName+'"'
     }, function (err, result) {
         if (err) throw err;
+        if (result.length === 0){
+            reply.send('ERROR')
+            return;
+        }
 
-        let comparison = bcrypt.compare(password, result[0].password);
-
-        if (comparison){
+        if (result[0].password === passwordHash){
             reply.send('OK')
         } else {
             reply.send('ERROR')
@@ -127,10 +130,10 @@ app.post('/login', async (request, reply) => {
     });
 })
 
-app.post('add_login', async (request, reply) => {
+app.post('/add_login', async (request, reply) => {
     let userName = request.body.userName, password = request.body.password;
 
-    let ePassword = bcrypt.hash(password, saltRounds);
+    let ePassword = crypto.createHash('md5').update(password).digest('hex')
 
     connection.query({
         sql: 'INSERT INTO login (user_name, password) VALUES ("'+userName+'", "'+ePassword+'")'

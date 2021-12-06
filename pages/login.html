@@ -20,13 +20,30 @@
             </form>
 
             <br>
-            <button onclick="login(); async">Login</button>
+            <button id='btn' onclick="login(); async">Login</button>
         </div>
 
     </body>
 
 
     <script>
+
+
+        document.getElementById("userName").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById("btn").click();
+            }
+        });
+
+        document.getElementById("password").addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById("btn").click();
+            }
+        });
+
+
         async function login(){
 
             let http = new XMLHttpRequest();

@@ -30,7 +30,7 @@
       async function addLogin(){
           let passwordTest = document.getElementById('password1').value;
 
-          if (passwordTest !== document.getElementById('password2')){
+          if (passwordTest !== document.getElementById('password2').value){
               alert("Error, passwords do not match");
               return;
           }
@@ -38,8 +38,8 @@
           let http = new XMLHttpRequest();
           let url = '/add_login';
 
-          let userName= 'userName=' + document.getElementById("userName").value;
-          let password= 'lastName=' + passwordTest;
+          let userName = 'userName=' + document.getElementById("userName").value;
+          let password = 'password=' + passwordTest;
 
           http.open('POST', url, true);
           http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
