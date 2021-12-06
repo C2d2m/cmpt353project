@@ -1,72 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Modify Customer</title>
-</head>
-<body onload="renderData(); async ">
+    <head>
+        <meta charset="UTF-8">
+        <title>Modify Customer</title>
+    </head>
 
-<h1>Modify Customer</h1>
+    <body onload="renderData(); async ">
 
-<form>
-    <label for="fname">First name:</label><br>
-    <input type="text" id="fname" name="fname"><br>
+        <h1>Modify Customer</h1>
 
-    <label for="lname">Last name:</label><br>
-    <input type="text" id="lname" name="lname"><br>
+        <form>
+            <label for="fname">First name:</label><br>
+            <input type="text" id="fname" name="fname"><br>
 
-    <label for="pNumber">Phone number:</label><br>
-    <input type="text" id="pNumber" name="pNumber"><br>
+            <label for="lname">Last name:</label><br>
+            <input type="text" id="lname" name="lname"><br>
 
-    <label for="notes">Notes:</label><br>
-    <input type="text" id="notes" name="notes" >
-</form>
+            <label for="pNumber">Phone number:</label><br>
+            <input type="text" id="pNumber" name="pNumber"><br>
+
+            <label for="notes">Notes:</label><br>
+            <input type="text" id="notes" name="notes" >
+        </form>
 
 
-<button onclick="changeCustomer()">OK</button>
-<button onclick="window.location.href='../customer'">BACK</button>
+        <button onclick="changeCustomer()">OK</button>
+        <button onclick="window.location.href='../customers'">BACK</button>
 
-</body>
-</html>
+    </body>
 
-<script>
-    function renderData(){
-        let url = new URL(window.location.href);
+    <script>
+        function renderData(){
+            let url = new URL(window.location.href);
 
-        document.getElementById('fname').value = url.searchParams.get('fname')
-        document.getElementById('lname').value = url.searchParams.get('lname')
-        document.getElementById('pNumber').value = url.searchParams.get('phonenumber')
-        document.getElementById('notes').value = url.searchParams.get('notes')
-    }
-
-    function changeCustomer(){
-        if (!confirm('Are you sure you want to modify this person?')) {
-            return
+            document.getElementById('fname').value = url.searchParams.get('fname')
+            document.getElementById('lname').value = url.searchParams.get('lname')
+            document.getElementById('pNumber').value = url.searchParams.get('phonenumber')
+            document.getElementById('notes').value = url.searchParams.get('notes')
         }
 
-        let http = new XMLHttpRequest();
-        let url = '/customer_change';
-        let id = 'id=' + new URL(window.location.href).searchParams.get('id');
-        let firstName= 'firstName=' + document.getElementById("fname").value;
-        let lastName= 'lastName=' + document.getElementById("lname").value;
-        let phoneNumber= 'phoneNumber=' + document.getElementById("pNumber").value;
-        let notes= 'notes=' + document.getElementById("notes").value;
-
-        http.open('POST', url, true);
-        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-        http.send(id+'&'+lastName+'&'+firstName+'&'+phoneNumber+'&'+notes);
-
-        http.onreadystatechange = function()
-        {
-            if(http.readyState == 4 && http.status == 200)
-            {
-
-                // document.getElementById("postBox").textContent();
-                alert("Customer Modified!");
-                window.location.href='../customers'
+        function changeCustomer(){
+            if (!confirm('Are you sure you want to modify this person?')) {
+                return
             }
 
-        };
-    }
-</script>
+            let http = new XMLHttpRequest();
+            let url = '/customer_change';
+            let id = 'id=' + new URL(window.location.href).searchParams.get('id');
+            let firstName= 'firstName=' + document.getElementById("fname").value;
+            let lastName= 'lastName=' + document.getElementById("lname").value;
+            let phoneNumber= 'phoneNumber=' + document.getElementById("pNumber").value;
+            let notes= 'notes=' + document.getElementById("notes").value;
+
+            http.open('POST', url, true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            http.send(id+'&'+lastName+'&'+firstName+'&'+phoneNumber+'&'+notes);
+
+            http.onreadystatechange = function()
+            {
+                if(http.readyState === 4 && http.status === 200)
+                {
+                    alert(http.responseText);
+                    window.location.href='../customers'
+                }
+
+            };
+        }
+    </script>
+
+</html>
+

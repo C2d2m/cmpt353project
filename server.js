@@ -101,8 +101,7 @@ app.post('/staff_reg', (req, res) => {
         console.log("1 record inserted into staff");
     });
 
-
-    res.send(`OK, added ${fName} to staff`) // or, depending on implementation, this can be a list of registered staff with details
+    res.send(`OK, added ${fName} ${lName} to staff`) // or, depending on implementation, this can be a list of registered staff with details
 })
 
 // Delete staff row from table
@@ -116,7 +115,7 @@ app.post('/staff_del', (req, res) => {
         console.log("1 record deleted from staff");
     });
 
-    res.send(`OK, deleted ${id} from staff`) // or, depending on implementation, this can be a list of registered staff
+    res.send(`OK, deleted #${id} from staff`) // or, depending on implementation, this can be a list of registered staff
 })
 
 // Update staff row
@@ -133,7 +132,7 @@ app.post('/staff_change', (req, res) => {
         console.log("1 record updated in staff");
     });
 
-    res.send(`OK, record changed for staff ${id}`) // or, depending on implementation, this can be a list of registered staff
+    res.send(`OK, record changed for staff #${id}`) // or, depending on implementation, this can be a list of registered staff
 })
 
 // CUSTOMER METHODS
@@ -143,7 +142,7 @@ app.get('/customer_view', (req, res) => {
     //Query Database for customer id of a given first and last name
     connection.query({
         sql : 'SELECT * FROM customers'
-    }, function (err, result, fields) {
+    }, function (err, result) {
         if (err) throw err;
         let answer = ''
         result.forEach(element => {
@@ -169,7 +168,7 @@ app.post('/customer_reg', (req, res) => {
         console.log("1 record inserted int customers");
     });
 
-    res.send(`OK, added ${fName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
+    res.send(`OK, added ${fName} ${lName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
 })
 
 // Delete customer from table
@@ -183,7 +182,7 @@ app.post('/customer_del', (req, res) => {
         console.log("1 record deleted from customers");
     });
 
-    res.send(`OK, deleted ${id} from customers`) // or, depending on implementation, this can be a list of registered customers
+    res.send(`OK, deleted #${id} from customers`) // or, depending on implementation, this can be a list of registered customers
 })
 
 // Update row in customer table
@@ -200,7 +199,7 @@ app.post('/customer_change', (req, res) => {
         console.log("1 record updated in customers");
     });
 
-    res.send(`OK, record changed for customer ${id}`) // or, depending on implementation, this can be a list of registered customers
+    res.send(`OK, record changed for customer #${id}`) // or, depending on implementation, this can be a list of registered customers
 })
 
 // REPORT METHODS
@@ -231,6 +230,11 @@ app.post('/customer_report', (req, res) => {
     }, function (err, result) {
         if (err) throw err;
 
+        if (result.length === 0){
+            res.send(`Error, ${fName} ${lName} could not be found`)
+            return;
+        }
+
         // Organize data from query
         Object.keys(result).forEach(function(key) {
             let row = result[key];
@@ -242,11 +246,10 @@ app.post('/customer_report', (req, res) => {
             }, function (err) {
                 if (err) throw err;
                 console.log("1 record inserted into records");
+                res.send(`OK, added ${fName} ${lName}'s report`)
             });
         });
     });
-
-    res.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
 })
 
 // I don't know what this does but I have it from a previous assignment. Commenting it out doesn't seem to affect anything

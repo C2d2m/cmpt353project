@@ -1,60 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-<label>Add Staff</label>
 
+    <head>
+        <meta charset="UTF-8">
+        <title>Add Staff</title>
+    </head>
 
+    <body>
+        <h1>Add Staff</h1>
 
-<form>
-    <label for="fname">First name:</label><br>
-    <input type="text" id="fname" name="fname"><br>
+        <form>
+            <label for="fname">First name:</label><br>
+            <input type="text" id="fname" name="fname"><br>
 
-    <label for="lname">Last name:</label><br>
-    <input type="text" id="lname" name="lname"><br>
+            <label for="lname">Last name:</label><br>
+            <input type="text" id="lname" name="lname"><br>
 
-    <label for="pNumber">Phone number:</label><br>
-    <input type="text" id="pNumber" name="pNumber"><br>
+            <label for="pNumber">Phone number:</label><br>
+            <input type="text" id="pNumber" name="pNumber"><br>
 
-    <label for="notes">Notes:</label><br>
-    <input type="text" id="notes" name="notes" >
-</form>
+            <label for="notes">Notes:</label><br>
+            <input type="text" id="notes" name="notes" >
+        </form>
 
+        <button onclick="addStaff()">ADD</button>
+        <button onclick="window.location.href='../staff'">BACK</button>
+    </body>
 
-<button onclick="addStaff()">ADD</button>
-<button onclick="window.location.href='../staff'">BACK</button>
+    <script>
+        function addStaff()
+        {
+            let http = new XMLHttpRequest();
+            let url = '/staff_reg';
+
+            let firstName= 'firstName=' + document.getElementById("fname").value;
+            let lastName= 'lastName=' + document.getElementById("lname").value;
+            let phoneNumber= 'phoneNumber=' + document.getElementById("pNumber").value;
+            let notes= 'notes=' + document.getElementById("notes").value;
+
+            http.open('POST', url, true);
+
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            http.send(lastName+'&'+firstName+'&'+phoneNumber+'&'+notes);
+
+            http.onreadystatechange = function()
+            {
+                if(http.readyState === 4 && http.status === 200)
+                {
+                    alert(http.responseText);
+                    window.location.href='../staff'
+                }
+            };
+        }
+    </script>
 
 </html>
-
-<script>
-    function addStaff()
-    {
-
-        let http = new XMLHttpRequest();
-        let url = '/staff_reg';
-
-        let firstName= 'firstName=' + document.getElementById("fname").value;
-        let lastName= 'lastName=' + document.getElementById("lname").value;
-        let phoneNumber= 'phoneNumber=' + document.getElementById("pNumber").value;
-        let notes= 'notes=' + document.getElementById("notes").value;
-
-        http.open('POST', url, true);
-
-        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-        http.onreadystatechange = function()
-        {
-            if(http.readyState == 4 && http.status == 200)
-            {
-
-                // document.getElementById("postBox").textContent();
-                alert("Staff Added!");
-                document.getElementById("response").value = http.responseText;
-                window.location.href='../staff'
-            }
-
-        };
-
-        http.send(lastName+'&'+firstName+'&'+phoneNumber+'&'+notes);
-
-
-    }
-</script>
