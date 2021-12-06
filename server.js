@@ -25,11 +25,11 @@ connection.connect(function(err) {
     console.log('connected as id ' + connection.threadId);
 });
 
+// ROUTES
 // Load main page on startup
 app.get('/', (req, res) => {
     res.sendFile('index.html', { root: path.join(__dirname, './pages') });
 });
-
 
 // Staff page gets
 app.get('/staff', (req, res) => {
@@ -254,6 +254,7 @@ app.use('/', express.static('pages'));
 app.listen(PORT,HOST, (err) => {
     if (err) {
         console.log(`Failure to listen on ${HOST}:${PORT}`)
+        throw err
     }
     else {
         console.log(`listening on ${HOST}:${PORT}`)
