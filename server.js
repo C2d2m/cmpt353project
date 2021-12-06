@@ -30,37 +30,66 @@ app.get('/', (req, res) => {
     res.sendFile('index.html', { root: path.join(__dirname, './pages') });
 });
 
-
 // as cool as the idea of a general page loader was, it was hard and ugly to even try to implement (trying to render a filestream).
 // Because it's simple I'll just implement GETs for each
 // The actual process of redirecting to these GETs is in the .html
+
+// Staff page gets
+app.get('/staff', (req, res) => {
+    res.sendFile('view_staff.html', { root: path.join(__dirname, './pages') });
+})
 app.get('/staff/add', (req, res) => {
     res.sendFile('add_staff.html', { root: path.join(__dirname, './pages') });
-})
-app.get('/customers/add', (req, res) => {
-    res.sendFile('add_customer.html', { root: path.join(__dirname, './pages') });
 })
 app.get('/staff/change', (req, res) => {
     res.sendFile('change_staff.html', { root: path.join(__dirname, './pages') });
 })
-app.get('/customers/change', (req, res) => {
-    res.sendFile('change_customer.html', { root: path.join(__dirname, './pages') });
-})
-app.get('/report', (req, res) => {
-    res.sendFile('add_report.html', { root: path.join(__dirname, './pages') });
-})
-app.get('/staff', (req, res) => {
-    res.sendFile('view_staff.html', { root: path.join(__dirname, './pages') });
-})
+
+// Customer page gets
 app.get('/customers', (req, res) => {
     res.sendFile('view_customers.html', { root: path.join(__dirname, './pages') });
 })
+app.get('/customers/add', (req, res) => {
+    res.sendFile('add_customer.html', { root: path.join(__dirname, './pages') });
+})
+app.get('/customers/change', (req, res) => {
+    res.sendFile('change_customer.html', { root: path.join(__dirname, './pages') });
+})
+
+// Report get
+app.get('/report', (req, res) => {
+    res.sendFile('add_report.html', { root: path.join(__dirname, './pages') });
+})
+
 
 
 // posts for accessing database stuff
 // Some notes: _change posts will ideally take in all modifiable var (name, age, etc) and use a flag for values to be left unchanged (instead of new posts for changing each var)
 // staff
 
+// STAFF METHODS
+// Send a list with all the info for the staff in the database
+app.get('/staff_view', (req, res) => {
+
+    //Query Database for customer id of a given first and last name
+    connection.query({
+        sql : 'SELECT * FROM staff'
+    }, function (err, result) {
+        if (err) throw err;
+        let answer = ''
+        result.forEach(element => {
+            answer += element.id + "|"
+            answer += element.first_name + "|"
+            answer += element.last_name + "|"
+            answer += element.phone_number + "|"
+            answer += element.notes + "|"
+        });
+
+        res.send(answer)
+    });
+})
+
+// Add new staff
 app.post('/staff_reg', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
@@ -76,6 +105,21 @@ app.post('/staff_reg', (req, res) => {
     res.send(`OK, added ${fName} to staff`) // or, depending on implementation, this can be a list of registered staff with details
 })
 
+// Delete staff row from table
+app.post('/staff_del', (req, res) => {
+    let id = req.body.id;
+
+    connection.query({
+        sql : 'DELETE FROM staff WHERE id = "'+id+'"'
+    }, function (err){
+        if (err) throw err;
+        console.log("1 record deleted from staff");
+    });
+
+    res.send(`OK, deleted ${id} from staff`) // or, depending on implementation, this can be a list of registered staff
+})
+
+// Update staff row
 app.post('/staff_change', (req, res) => {
     let id = req.body.id;
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
@@ -92,31 +136,16 @@ app.post('/staff_change', (req, res) => {
     res.send(`OK, record changed for staff ${id}`) // or, depending on implementation, this can be a list of registered staff
 })
 
-app.post('/staff_del', (req, res) => {
-    let id = req.body.id;
-
-    connection.query({
-        sql : 'DELETE FROM staff WHERE id = "'+id+'"'
-    }, function (err){
-        if (err) throw err;
-        console.log("1 record deleted from staff");
-    });
-
-    res.send(`OK, deleted ${id} from staff`) // or, depending on implementation, this can be a list of registered staff
-})
-app.get('/staff_view', (req, res) => {
-    // var name = req.body.name;
-    //TODO: find customer id by name in SQL
-    //      get details from that customer
-    //      use id to get list of reports from report DB
-    //      make gabe figure out how to return data in usable (parsable string?) format for .html
+// CUSTOMER METHODS
+// Get list of all the customers in the database
+app.get('/customer_view', (req, res) => {
 
     //Query Database for customer id of a given first and last name
     connection.query({
-        sql : 'SELECT * FROM staff'
+        sql : 'SELECT * FROM customers'
     }, function (err, result, fields) {
         if (err) throw err;
-        answer = ''
+        let answer = ''
         result.forEach(element => {
             answer += element.id + "|"
             answer += element.first_name + "|"
@@ -124,28 +153,11 @@ app.get('/staff_view', (req, res) => {
             answer += element.phone_number + "|"
             answer += element.notes + "|"
         });
-
         res.send(answer)
-        
-
-        // let row = result[key];
-        // let customerID = row.id
-
-            // Add the report into reports with the customers id
-            // connection.query({
-            //     sql : 'INSERT INTO reports (customer_id, report) VALUES ("'+customerID+'", "'+report+'")'
-            // }, function (err, result, fields) {
-            //     if (err) throw err;
-            //     console.log("1 record inserted into records");
-            // });
-
     });
-
-    // res.send(`OK, here is ${name}'s details`) // this will eventually be readable data
 })
 
-
-// customers
+// Add new customer to table
 app.post('/customer_reg', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
 
@@ -160,6 +172,21 @@ app.post('/customer_reg', (req, res) => {
     res.send(`OK, added ${fName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
 })
 
+// Delete customer from table
+app.post('/customer_del', (req, res) => {
+    let id = req.body.id;
+
+    connection.query({
+        sql : 'DELETE FROM customers WHERE id = "'+id+'"'
+    }, function (err){
+        if (err) throw err;
+        console.log("1 record deleted from customers");
+    });
+
+    res.send(`OK, deleted ${id} from customers`) // or, depending on implementation, this can be a list of registered customers
+})
+
+// Update row in customer table
 app.post('/customer_change', (req, res) => {
     let id = req.body.id;
     let fName = req.body.firstName, lName = req.body.lastName, phoneNumber = req.body.phoneNumber, notes = req.body.notes;
@@ -176,26 +203,32 @@ app.post('/customer_change', (req, res) => {
     res.send(`OK, record changed for customer ${id}`) // or, depending on implementation, this can be a list of registered customers
 })
 
-app.post('/customer_del', (req, res) => {
+// REPORT METHODS
+// Send all of the reports for a given customer id
+app.post('/get_reports', (req, res) => {
     let id = req.body.id;
 
     connection.query({
-        sql : 'DELETE FROM customers WHERE id = "'+id+'"'
-    }, function (err){
+        sql : 'SELECT * FROM reports WHERE customer_id = "'+id+'"'
+    }, function (err, result){
         if (err) throw err;
-        console.log("1 record deleted from customers");
+        let answer = ''
+        result.forEach(e => {
+            answer += e.id + '|'
+            answer += e.report + '|'
+        });
+        res.send(answer);
     });
-
-    res.send(`OK, deleted ${id} from customers`) // or, depending on implementation, this can be a list of registered customers
 })
 
+// Add a new report for a customer for a given first and last name
 app.post('/customer_report', (req, res) => {
     let fName = req.body.firstName, lName = req.body.lastName, report = req.body.report;
 
     //Query Database for customer id of a given first and last name
     connection.query({
         sql : 'SELECT * FROM customers WHERE last_Name = "'+lName+'" AND first_name = "'+fName+'"'
-    }, function (err, result, fields) {
+    }, function (err, result) {
         if (err) throw err;
 
         // Organize data from query
@@ -206,7 +239,7 @@ app.post('/customer_report', (req, res) => {
             // Add the report into reports with the customers id
             connection.query({
                 sql : 'INSERT INTO reports (customer_id, report) VALUES ("'+customerID+'", "'+report+'")'
-            }, function (err, result, fields) {
+            }, function (err) {
                 if (err) throw err;
                 console.log("1 record inserted into records");
             });
@@ -216,70 +249,8 @@ app.post('/customer_report', (req, res) => {
     res.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
 })
 
-app.get('/get_reports', (req, res) => {
-    let id = req.body.id;
-
-    connection.query({
-        sql : 'SELECT * FROM reports WHERE customer_id = "'+id+'"'
-    }, function (err, result){
-        if (err) throw err;
-        answer = ''
-        result.forEach(e => {
-            answer += e.id + '|'
-            answer += e.report + '|'
-        });
-        res.send(answer);
-    });
-
-
-})
-
-app.get('/customer_view', (req, res) => {
-    // var name = req.body.name;
-    //TODO: find customer id by name in SQL
-    //      get details from that customer
-    //      use id to get list of reports from report DB
-    //      make gabe figure out how to return data in usable (parsable string?) format for .html
-
-    //Query Database for customer id of a given first and last name
-    connection.query({
-        sql : 'SELECT * FROM customers'
-    }, function (err, result, fields) {
-        if (err) throw err;
-        answer = ''
-        result.forEach(element => {
-            answer += element.id + "|"
-            answer += element.first_name + "|"
-            answer += element.last_name + "|"
-            answer += element.phone_number + "|"
-            answer += element.notes + "|"
-        });
-        res.send(answer)
-        
-
-        // let row = result[key];
-        // let customerID = row.id
-
-            // Add the report into reports with the customers id
-            // connection.query({
-            //     sql : 'INSERT INTO reports (customer_id, report) VALUES ("'+customerID+'", "'+report+'")'
-            // }, function (err, result, fields) {
-            //     if (err) throw err;
-            //     console.log("1 record inserted into records");
-            // });
-
-    });
-
-    // res.send(`OK, here is ${name}'s details`) // this will eventually be readable data
-})
-
-
-
-
-
 // I don't know what this does but I have it from a previous assignment. Commenting it out doesn't seem to affect anything
 app.use('/', express.static('pages'));
-
 
 app.listen(PORT,HOST, (err) => {
     if (err) {
