@@ -15,5 +15,9 @@
     "fastify": "^3.24.1",
     "fastify-formbody": "^5.2.0",
     "mysql": "^2.18.1"
+  },
+  "devDependencies": {
+    "bcrypt": "^5.0.1",
+    "fastify-cookie": "^5.4.0"
   }
 }

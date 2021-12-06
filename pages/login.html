@@ -20,8 +20,40 @@
             </form>
 
             <br>
-            <button onclick="window.location.href='./index'">Login</button>
+            <button onclick="login(); async">Login</button>
         </div>
 
     </body>
+
+
+    <script>
+        async function login(){
+
+            let http = new XMLHttpRequest();
+            let url = '/login';
+
+            let userName= 'userName=' + document.getElementById("userName").value;
+            let password= 'password=' + document.getElementById("password").value;
+
+
+            http.open('POST', url, true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            http.send(userName+'&'+password);
+
+            http.onreadystatechange = function()
+            {
+                if(http.readyState === 4 && http.status === 200) {
+
+                    if (http.responseText === 'OK'){
+                        window.location.href='/index';
+                        return
+                    }
+                    alert("ERROR, invalid login")
+                    window.location.href='../';
+                }
+            };
+        }
+    </script>
+
 </html>

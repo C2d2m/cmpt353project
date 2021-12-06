@@ -1,8 +1,16 @@
 const fastify = require('fastify');
 const fs = require('fs');
 const app = fastify();
-app.register(require('fastify-formbody'))
 const mysql = require('mysql');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+app.register(require('fastify-cookie'), {
+    secret : 'test-secret',
+    parseOptions: {}
+})
+
+app.register(require('fastify-formbody'))
 
 // app.use(bodyParser.urlencoded({ extended: true }));
 const PORT = 8080;
@@ -20,19 +28,8 @@ const connection = mysql.createConnection({
 connection.connect(function(err) {
     if (err) throw err;
     console.log('connected as id ' + connection.threadId);
-});
-
-// Load login page on startup
-app.get('/', async (request, reply) => {
-    const stream = fs.createReadStream('./pages/login.html')
-    reply.type('text/html').send(stream)
-});
-
-// Load welcome page
-app.get('/index', async (request, reply) =>{
-    const stream = fs.createReadStream('./pages/index.html')
-    reply.type('text/html').send(stream)
 })
+
 
 app.post('/redirect', async (request, reply) => {
     let filename = request.body.filename;
@@ -42,11 +39,24 @@ app.post('/redirect', async (request, reply) => {
 
 })
 
+
+
+// Load login page on startup
+app.get('/', async (request, reply) => {
+    const stream = fs.createReadStream('./pages/login.html')
+    reply.type('text/html').send(stream)
+})
+
+// Load welcome page
+app.get('/index', async (request, reply) =>{
+    const stream = fs.createReadStream('./pages/index.html')
+    reply.type('text/html').send(stream)
+})
+
 // Staff Gets
 
 app.get('/staff', async (request, reply) => {
     const stream = fs.createReadStream('./pages/view_staff.html')
-
     reply.type('text/html').send(stream)
 })
 app.get('/staff/add', async (request, reply) => {
@@ -78,10 +88,61 @@ app.get('/report', async (request, reply) => {
     reply.type('text/html').send(stream)
 })
 
+// Add new login
+app.get('/add_login', async (request, reply) => {
+    const stream = fs.createReadStream('./pages/add_login.html')
+    reply.type('text/html').send(stream)
+})
+
+
 
 // posts for accessing database stuff
 // Some notes: _change posts will ideally take in all modifiable var (name, age, etc) and use a flag for values to be left unchanged (instead of new posts for changing each var)
 // staff
+
+
+// Handle users logging in
+app.post('/login', async (request, reply) => {
+    let userName = request.body.userName, password = request.body.password;
+
+    // Hard code Admin
+    if (userName === 'admin' && password === 'admin'){
+        reply.send('OK')
+        return;
+    }
+
+    connection.query({
+        sql : 'SELECT * FROM login WHERE user_name = "'+userName+'"'
+    }, function (err, result) {
+        if (err) throw err;
+
+        let comparison = bcrypt.compare(password, result[0].password);
+
+        if (comparison){
+            reply.send('OK')
+        } else {
+            reply.send('ERROR')
+        }
+
+    });
+})
+
+app.post('add_login', async (request, reply) => {
+    let userName = request.body.userName, password = request.body.password;
+
+    let ePassword = bcrypt.hash(password, saltRounds);
+
+    connection.query({
+        sql: 'INSERT INTO login (user_name, password) VALUES ("'+userName+'", "'+ePassword+'")'
+    }, function (err) {
+        if (err) throw err;
+        console.log("1 record inserted into login");
+    })
+
+    reply.send(`OK, added ${userName} into login`);
+
+})
+
 
 // STAFF METHODS
 // Send all the staff in the db
