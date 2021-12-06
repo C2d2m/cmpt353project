@@ -34,6 +34,13 @@ app.get('/', async (request, reply) => {
 // The actual process of redirecting to these GETs is in the .html
 
 // Staff Gets
+app.post('/redirect', async (request, reply) => {
+    let filename = request.body.filename;
+
+    const stream = fs.createReadStream(`./pages/${filename}.html`)
+    reply.type('text/html').send(stream)
+})
+
 app.get('/staff', async (request, reply) => {
     const stream = fs.createReadStream('./pages/view_staff.html')
     reply.type('text/html').send(stream)
@@ -172,7 +179,7 @@ app.post('/customer_reg', async (request, reply) => {
         console.log("1 record inserted into customers");
     });
 
-     reply(`OK, added ${fName} ${lName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
+     reply.send(`OK, added ${fName} ${lName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
 })
 
 // Delete a new customer
