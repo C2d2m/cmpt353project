@@ -7,7 +7,7 @@ const loadtest = require('loadtest');
 
 const options = {
     url: 'http://localhost:8080/customer_report',
-    maxRequests: 0,
+    maxRequests: 100000,
     concurrency: 2,
     method: 'POST',
     contentType: 'application/x-www-form-urlencoded',
@@ -24,7 +24,7 @@ const PORT = 8080;
 const HOST = "127.0.0.1";
 
 // MYSQL Database connection info, can be updated depending on how we want to host/ test
-let db = new sqlite3.Database(':memory:', (err) => {
+let db = new sqlite3.Database('./data.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) {
         return console.error(err.message);
     }
@@ -32,19 +32,17 @@ let db = new sqlite3.Database(':memory:', (err) => {
 });
 
 db.serialize(() => {
-    let sql = 'CREATE TABLE IF NOT EXISTS staff (' +
-        'id INTEGER NOT NULL PRIMARY KEY, last_name TEXT NOT NULL, first_name TEXT NOT NULL, phone_number TEXT NOT NULL,' +
-        ' notes TEXT NOT NULL);'
-    db.run(sql);
 
-    sql = 'CREATE TABLE IF NOT EXISTS customers (' +
+    db.run('CREATE TABLE IF NOT EXISTS staff (' +
         'id INTEGER NOT NULL PRIMARY KEY, last_name TEXT NOT NULL, first_name TEXT NOT NULL, phone_number TEXT NOT NULL,' +
-        ' notes TEXT NOT NULL);'
-    db.run(sql);
+        ' notes TEXT NOT NULL);');
 
-    sql = 'CREATE TABLE IF NOT EXISTS reports (' +
-        'id INTEGER NOT NULL PRIMARY KEY, customer_id INTEGER NOT NULL, report TEXT NOT NULL);'
-    db.run(sql);
+    db.run('CREATE TABLE IF NOT EXISTS customers (' +
+        'id INTEGER NOT NULL PRIMARY KEY, last_name TEXT NOT NULL, first_name TEXT NOT NULL, phone_number TEXT NOT NULL,' +
+        ' notes TEXT NOT NULL);');
+
+    db.run('CREATE TABLE IF NOT EXISTS reports (' +
+        'id INTEGER NOT NULL PRIMARY KEY, customer_id INTEGER NOT NULL, report TEXT NOT NULL);');
 });
 
 
@@ -218,12 +216,11 @@ app.post('/customer_report', (req, res) => {
 
         // Organize data from query
         rows.forEach((row) => {
-            let customerID = row.id
+            let customerID = row.id;
+            let sql2 = 'INSERT INTO reports (customer_id, report) VALUES ("'+customerID+'", "'+report+'")';
 
             // Add the report into reports with the customers id
-            db.run({
-                sql : 'INSERT INTO reports (customer_id, report) VALUES ("'+customerID+'", "'+report+'")'
-            }, function (err, result, fields) {
+            db.run(sql2, (err) => {
                 if (err) throw err;
                 console.log("1 record inserted into records");
             });
@@ -302,21 +299,21 @@ app.listen(PORT,HOST, (err) => {
 
 fs = require('fs');
 
-loadtest.loadTest(options, function(error, result)
-{
-    if (error)
-    {
-        return console.error('Got an error: %s', error);
-    }
-    let data = ''
-    data += "RPS: "+ result.rps + '\n'
-    data += "Total Time: "+ result.totalTimeSeconds + '\n'
-    data += 'Mean Latency: ' + result.meanLatencyMs + '\n'
-    data += 'Max Latency: ' + result.maxLatencyMs + '\n'
-    data += 'Total Errors: ' + result.totalErrors
+//loadtest.loadTest(options, function(error, result)
+//{
+    //if (error)
+    //{
+    //    return console.error('Got an error: %s', error);
+    //}
+    //let data = ''
+    //data += "RPS: "+ result.rps + '\n'
+    //data += "Total Time: "+ result.totalTimeSeconds + '\n'
+    //data += 'Mean Latency: ' + result.meanLatencyMs + '\n'
+    //data += 'Max Latency: ' + result.maxLatencyMs + '\n'
+    //data += 'Total Errors: ' + result.totalErrors
 
-    fs.writeFile('out.txt', data, function (err){
+    //fs.writeFile('out.txt', data, function (err){
 
-    });
+    //});
 
-});
+//});
