@@ -1,28 +1,34 @@
-<html>
-    <body onload="viewStaff(); async " >
+<!DOCTYPE html>
+<html lang="eng">
 
-    <div class="table-data">
-        <h1>Staff List</h1>
+    <head>
+        <meta charset="UTF-8">
+        <title>Staff</title>
+    </head>
 
-        <table border="1" id="staffTable">
-            <tr>
-                <th>ID</th>
-                <th>Last Name</th>
-                <th>First Name</th>
-                <th>Phone Number</th>
-                <th>Notes</th>
-                <th>Edit</th>
-                <th>Delete</th>
-            </tr>
+    <body onload="viewStaff(); async" >
 
-        </table>
-    </div>
-    <br>
+        <div class="table-data">
+            <h1>Staff List</h1>
+
+            <table border="1" id="staffTable">
+                <tr>
+                    <th>ID</th>
+                    <th>Last Name</th>
+                    <th>First Name</th>
+                    <th>Phone Number</th>
+                    <th>Notes</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+
+            </table>
+            </div>
+        <br>
 
         <button onclick="window.location.href='/staff/add'">+</button>
         <button onclick="window.location.href='../'">BACK</button>
     </body>
-
 
     <script>
         function viewStaff()
@@ -33,12 +39,13 @@
             http.open('GET', url, true);
     
             http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            http.send();
     
             http.onreadystatechange = function()
             {
-                if(http.readyState == 4 && http.status == 200)
+                if(http.readyState === 4 && http.status === 200)
                 {
-                    //obviously this isn't final, parsed should contain all data needed in correct format
                     let answer = http.responseText;
 
                     if (answer === ''){
@@ -75,15 +82,9 @@
 
                         let cell7 = table.insertCell()
                         cell7.innerHTML = '<button onclick=deleteStaff("'+parsed[i].id+'")>Delete</button>'
-
-
                     }
                 }
             };
-
-            http.send();
-    
-            // window.location.href='./'
         }
 
         function deleteStaff(id){
@@ -102,21 +103,19 @@
 
             http.onreadystatechange = function()
             {
-                if(http.readyState == 4 && http.status == 200)
+                if(http.readyState === 4 && http.status === 200)
                 {
-
-                    // document.getElementById("postBox").textContent();
-                    alert("Staff Deleted!");
+                    alert(http.responseText);
                     window.location.href='../staff'
                 }
             };
         }
 
         function parseStringResponse(string) {
-            var stage_one = []
-            buffer = ""
-            Array.from(string).forEach((e, i) => {
-                if(e=="|") {
+            let stage_one = []
+            let buffer = ""
+            Array.from(string).forEach((e) => {
+                if(e==="|") {
                     stage_one.push(buffer)
                     buffer = ""
                 }
@@ -124,9 +123,9 @@
                     buffer += e
                 }
             });
-            var stage_two = []
+            let stage_two = []
             for (let i = 0; i < stage_one.length; i+=5) {
-                var some_element = {}
+                let some_element = {}
                 some_element['id'] = stage_one[i]
                 some_element['first_name'] = stage_one[i+1]
                 some_element['last_name'] = stage_one[i+2]

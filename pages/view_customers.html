@@ -1,54 +1,63 @@
-<html>
+<!DOCTYPE html>
+<html lang="eng">
+
+    <head>
+        <title>Customers</title>
+    </head>
+
     <body onload="viewCustomers(); async ">
-    <div class="table-data">
-        <h1>Customer List</h1>
+        <div class="table-data">
+            <h1>Customer List</h1>
 
-        <table border="1" id="customerTable">
-            <tr>
-                <th>ID</th>
-                <th>Last Name</th>
-                <th>First Name</th>
-                <th>Phone Number</th>
-                <th>Notes</th>
-                <th>Show Reports</th>
-                <th>Edit</th>
-                <th>Delete</th>
-            </tr>
+            <table border="1" id="customerTable">
+                <tr>
+                    <th>ID</th>
+                    <th>Last Name</th>
+                    <th>First Name</th>
+                    <th>Phone Number</th>
+                    <th>Notes</th>
+                    <th>Show Reports</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
 
-        </table>
-    </div>
+            </table>
+        </div>
 
-    <br>
-    <div id="report"></div>
+        <br>
 
-    <br>
+        <div id="report"></div>
 
+        <br>
         <button onclick="window.location.href='/customers/add'">+</button>
         <button onclick="window.location.href='../'">BACK</button>
     </body>
 
     <script>
-        function viewCustomers()
+        async function viewCustomers()
         {
     
-            var http = new XMLHttpRequest();
-            var url = '/customer_view';
+            let http = new XMLHttpRequest();
+            let url = '/customer_view';
     
             http.open('GET', url, true);
             http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            http.send();
+
             http.onreadystatechange = function()
             {
-                if(http.readyState == 4 && http.status == 200)
+                if(http.readyState === 4 && http.status === 200)
                 {
                     //obviously this isn't final, parsed should contain all data needed in correct format
                     let answer = http.responseText;
                     if (answer === ''){
 
-                        let table = document.getElementById("customerTable").insertRow(1)
+                        let table = document.getElementById("customerTable").insertRow(1);
                         let cell = table.insertCell(0);
-                        cell.colSpan = 7
-                        cell.textContent = "There are currently no customers registered"
-                        return
+                        cell.colSpan = 8;
+                        cell.textContent = "There are currently no customers registered";
+                        return;
                     }
 
                     let parsed = parseStringResponse(answer)
@@ -82,12 +91,7 @@
                     }
                 }
             };
-    
-            http.send();
-    
-            // window.location.href='./'
         }
-
 
         function deleteCustomer(id){
             if (!confirm('Are you sure you want to delete this person?')) {
@@ -105,11 +109,9 @@
 
             http.onreadystatechange = function()
             {
-                if(http.readyState == 4 && http.status == 200)
+                if(http.readyState === 4 && http.status === 200)
                 {
-
-                    // document.getElementById("postBox").textContent();
-                    alert("Customer Deleted!");
+                    alert(http.responseText);
                     window.location.href='../customers'
                 }
             };
@@ -119,22 +121,21 @@
         function showReport(id){
             document.getElementById('report').innerText = ""
 
-            var http = new XMLHttpRequest();
-            var url = '/get_reports';
+            let http = new XMLHttpRequest();
+            let url = '/get_reports';
 
-            var param= 'id=' + id;
+            let param= 'id=' + id;
 
-            http.open('GET', url, true);
+            http.open('POST', url, true);
             http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             http.send(param);
 
             http.onreadystatechange = function() {
-                if (http.readyState == 4 && http.status == 200) {
-                    //obviously this isn't final, parsed should contain all data needed in correct format
+                if (http.readyState === 4 && http.status === 200) {
+
                     let answer = http.responseText;
 
                     if (answer === ''){
-
                         document.getElementById('report').innerText = "No reports found"
                         return
                     }
@@ -148,14 +149,13 @@
                     }
                 }
             };
-
         }
 
         function parseStringResponse(string) {
-            var stage_one = []
-            buffer = ""
-            Array.from(string).forEach((e, i) => {
-                if(e=="|") {
+            let stage_one = []
+            let buffer = ""
+            Array.from(string).forEach((e) => {
+                if(e==="|") {
                     stage_one.push(buffer)
                     buffer = ""
                 }
@@ -163,9 +163,9 @@
                     buffer += e
                 }
             });
-            var stage_two = []
+            let stage_two = []
             for (let i = 0; i < stage_one.length; i+=5) {
-                var some_element = {}
+                let some_element = {}
                 some_element['id'] = stage_one[i]
                 some_element['first_name'] = stage_one[i+1]
                 some_element['last_name'] = stage_one[i+2]
@@ -177,10 +177,10 @@
         }
 
         function parseReportResponse(string) {
-            var stage_one = []
-            buffer = ""
-            Array.from(string).forEach((e, i) => {
-                if(e=="|") {
+            let stage_one = []
+            let buffer = ""
+            Array.from(string).forEach((e) => {
+                if(e==="|") {
                     stage_one.push(buffer)
                     buffer = ""
                 }
@@ -188,9 +188,9 @@
                     buffer += e
                 }
             });
-            var stage_two = []
+            let stage_two = []
             for (let i = 0; i < stage_one.length; i+=2) {
-                var some_element = {}
+                let some_element = {}
                 some_element['id'] = stage_one[i]
                 some_element['report'] = stage_one[i+1]
                 stage_two.push(some_element)

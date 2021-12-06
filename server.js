@@ -227,7 +227,7 @@ app.post('/customer_report', async (request, reply) => {
     reply.send(`OK, added ${lName}'s report`) // or, depending on implementation, this can be a list of the registered customers (or of that specific customers reports)
 })
 
-app.get('/get_reports', async (request, reply) => {
+app.post('/get_reports', async (request, reply) => {
     let id = request.body.id;
 
     connection.query({

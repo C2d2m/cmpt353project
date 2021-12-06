@@ -1,56 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-<label>Add Report</label>
+    <head>
+        <meta charset="UTF-8">
+        <title>Add Report</title>
+    </head>
+
+    <body>
+        <h1>Add Report</h1>
+
+        <form>
+            <label for="fname">First name:</label><br>
+            <input type="text" id="fname" name="fname"><br>
+
+            <label for="lname">Last name:</label><br>
+            <input type="text" id="lname" name="lname"><br>
+
+            <label for="report">Report:</label><br>
+            <textarea id="report" name="report" rows=12 cols="60"  ></textarea>
+        </form>
 
 
-
-<form>
-    <label for="fname">First name:</label><br>
-    <input type="text" id="fname" name="fname"><br>
-
-    <label for="lname">Last name:</label><br>
-    <input type="text" id="lname" name="lname"><br>
-
-    <label for="report">Report:</label><br>
-    <textarea id="report" name="report" rows=12 cols="60"  ></textarea>
-</form>
+        <button onclick="addReport()">ADD</button>
+        <button onclick="window.location.href='../'">BACK</button>
+    </body>
 
 
-<button onclick="addReport()">ADD</button>
-<button onclick="window.location.href='../'">BACK</button>
+    <script>
+        function addReport()
+        {
+            let http = new XMLHttpRequest();
+            let url = '/customer_report';
 
+            let firstName= 'firstName=' + document.getElementById("fname").value;
+            let lastName= 'lastName=' + document.getElementById("lname").value;
+            let report= 'report=' + document.getElementById("report").value;
+
+            http.open('POST', url, true);
+
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send(lastName+'&'+firstName+'&'+report);
+
+            http.onreadystatechange = function()
+            {
+                if(http.readyState === 4 && http.status === 200)
+                {
+                    alert(http.responseText);
+                    window.location.href='./report'
+                }
+            };
+        }
+    </script>
 </html>
 
-<script>
-    function addReport()
-    {
-
-        var http = new XMLHttpRequest();
-        var url = '/customer_report';
-
-        var firstName= 'firstName=' + document.getElementById("fname").value;
-        var lastName= 'lastName=' + document.getElementById("lname").value;
-        var report= 'report=' + document.getElementById("report").value;
-
-        http.open('POST', url, true);
-
-        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-        http.onreadystatechange = function()
-        {
-            if(http.readyState == 4 && http.status == 200)
-            {
-
-                // document.getElementById("postBox").textContent();
-                alert("Report Added!");
-                document.getElementById("response").value = http.responseText;
-                // window.location.reload;
-            }
-
-        };
-
-        http.send(lastName+'&'+firstName+'&'+report);
-
-        window.location.href='./report'
-    }
-</script>

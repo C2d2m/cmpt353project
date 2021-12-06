@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <meta charset="UTF-8">
         <title>CBO</title>
 
         <style>
@@ -22,10 +23,10 @@
 
     </head>
 
-    <h1 style="text-align:center">Welcome</h1>
-
 
     <body>
+        <h1 style="text-align:center">Welcome</h1>
+
         <br>
         <button class="mainButton" onclick="window.location.href='./staff'">Staff</button>
         <br>
@@ -33,42 +34,8 @@
         <br>
         <button class="mainButton" onclick="window.location.href='./report'">Add Report</button>
 
-
     </body>
 
 </html>
 
-
-<script type = "text/javascript">
-
-    // Honestly, I don't know how to accept more than one param in this format.
-    function test()
-    {
-        var http = new XMLHttpRequest();
-        var url = '/customer_view';
-        var param = 'name=' + "TestName";
-
-        http.open('POST', url, true);
-
-        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-        http.onreadystatechange = function()
-        {
-            if(http.readyState == 4 && http.status == 200)
-            {
-
-            // document.getElementById("postBox").textContent();
-            alert("Message Sent!");
-            document.getElementById("response").value = http.responseText;
-            // window.location.reload;
-            }
-
-        };
-
-        http.send(param);
-
-        // http.abort();
-    }
-
-    </script>
 
