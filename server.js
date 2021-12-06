@@ -30,9 +30,6 @@ app.get('/', (req, res) => {
     res.sendFile('index.html', { root: path.join(__dirname, './pages') });
 });
 
-// as cool as the idea of a general page loader was, it was hard and ugly to even try to implement (trying to render a filestream).
-// Because it's simple I'll just implement GETs for each
-// The actual process of redirecting to these GETs is in the .html
 
 // Staff page gets
 app.get('/staff', (req, res) => {
@@ -252,7 +249,6 @@ app.post('/customer_report', (req, res) => {
     });
 })
 
-// I don't know what this does but I have it from a previous assignment. Commenting it out doesn't seem to affect anything
 app.use('/', express.static('pages'));
 
 app.listen(PORT,HOST, (err) => {
