@@ -147,7 +147,7 @@ app.get('/customer_view', async (request, reply) => {
     //Query Database for customer id of a given first and last name
     connection.query({
         sql : 'SELECT * FROM customers'
-    }, function (err, result) {
+    }, function (err, result){
         if (err) throw err;
         let answer = ''
         result.forEach(element => {
@@ -172,7 +172,7 @@ app.post('/customer_reg', async (request, reply) => {
         console.log("1 record inserted into customers");
     });
 
-     return (`OK, added ${fName} ${lName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
+     reply(`OK, added ${fName} ${lName} to customers`) // or, depending on implementation, this can be a list of registered customers with data
 })
 
 // Delete a new customer
