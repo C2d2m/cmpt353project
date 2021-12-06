@@ -6,6 +6,22 @@ app.register(require('fastify-formbody'))
 const bodyParser = require("body-parser");
 const mysql = require('mysql');
 
+const loadtest = require('loadtest');
+
+const options = {
+    url: 'http://localhost:8080/customer_report',
+    maxRequests: 100000,
+    concurrency: 20,
+    method: 'POST',
+    contentType: 'application/x-www-form-urlencoded',
+    body: {
+        firstName: 'Caleb',
+        lastName: 'Milo',
+        report: 'Has a pet cat'
+    }
+};
+
+
 // app.use(bodyParser.urlencoded({ extended: true }));
 
 const PORT = 8080;
@@ -300,3 +316,27 @@ app.listen(PORT,HOST, (err) => {
         console.log(`listening on ${HOST}:${PORT}`)
     }
 })
+
+
+loadtest.loadTest(options, function(error, result)
+{
+    if (error)
+    {
+        return console.error('Got an error: %s', error);
+    }
+    let data = ''
+    data += "RPS: "+ result.rps + '\n'
+    data += "Total Time: "+ result.totalTimeSeconds + '\n'
+    data += 'Mean Latency: ' + result.meanLatencyMs + '\n'
+    data += 'Max Latency: ' + result.maxLatencyMs + '\n'
+    data += 'Total Errors: ' + result.totalErrors
+
+    fs.writeFile('out.txt', data, function (err){
+        if (err) {
+            throw err 
+        }
+        console.log('finished!?')
+    
+    });
+
+});

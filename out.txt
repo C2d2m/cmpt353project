@@ -1,0 +1,5 @@
+RPS: 341
+Total Time: 293.06447230000003
+Mean Latency: 58.6
+Max Latency: 280
+Total Errors: 0
