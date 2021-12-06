@@ -22,27 +22,31 @@ connection.connect(function(err) {
     console.log('connected as id ' + connection.threadId);
 });
 
-// Load main page on startup
+// Load login page on startup
 app.get('/', async (request, reply) => {
-    const stream = fs.createReadStream('./pages/index.html')
+    const stream = fs.createReadStream('./pages/login.html')
     reply.type('text/html').send(stream)
 });
 
+// Load welcome page
+app.get('/index', async (request, reply) =>{
+    const stream = fs.createReadStream('./pages/index.html')
+    reply.type('text/html').send(stream)
+})
 
-// as cool as the idea of a general page loader was, it was hard and ugly to even try to implement (trying to render a filestream).
-// Because it's simple I'll just implement GETs for each
-// The actual process of redirecting to these GETs is in the .html
-
-// Staff Gets
 app.post('/redirect', async (request, reply) => {
     let filename = request.body.filename;
 
     const stream = fs.createReadStream(`./pages/${filename}.html`)
     reply.type('text/html').send(stream)
+
 })
+
+// Staff Gets
 
 app.get('/staff', async (request, reply) => {
     const stream = fs.createReadStream('./pages/view_staff.html')
+
     reply.type('text/html').send(stream)
 })
 app.get('/staff/add', async (request, reply) => {
@@ -193,7 +197,9 @@ app.post('/customer_del', async (request, reply) => {
         console.log("1 record deleted from customers");
     });
 
-    reply.send(`OK, deleted #${id} from customers`) // or, depending on implementation, this can be a list of registered customers
+    reply.send(`OK, deleted #${id} from customers`)
+
+     // or, depending on implementation, this can be a list of registered customers
 })
 
 // Update a row in customers
