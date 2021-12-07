@@ -61,11 +61,9 @@
             http.onreadystatechange = function()
             {
                 if(http.readyState === 4 && http.status === 200) {
+                    window.location.href='/index';
 
-                    if (http.responseText === 'OK'){
-                        window.location.href='/index';
-                        return
-                    }
+                } else if (http.readyState === 4 && http.status === 401){
                     alert("ERROR, invalid login")
                     window.location.href='../';
                 }

@@ -24,7 +24,7 @@
     </head>
 
 
-    <body>
+    <body onload="authenticate()">
         <h1 style="text-align:center">Welcome</h1>
 
         <br>
@@ -37,6 +37,25 @@
         <button class="mainButton" onclick="window.location.href='./add_login'">Add Login</button>
 
     </body>
+
+<script>
+    function authenticate(){
+        let http = new XMLHttpRequest();
+        let url = '/authenticate';
+
+        http.open('GET', url, true);
+        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        http.send()
+
+        http.onreadystatechange = function()
+        {
+            if(http.readyState === 4 && http.status === 401)
+            {
+                window.location.href='./';
+            }
+        };
+    }
+</script>
 
 </html>
 

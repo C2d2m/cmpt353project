@@ -5,7 +5,7 @@
         <title>Add Report</title>
     </head>
 
-    <body>
+    <body onload="authenticate()">
         <h1>Add Report</h1>
 
         <form>
@@ -46,6 +46,23 @@
                 {
                     alert(http.responseText);
                     window.location.href='./report'
+                }
+            };
+        }
+
+        function authenticate(){
+            let http = new XMLHttpRequest();
+            let url = '/authenticate';
+
+            http.open('GET', url, true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send()
+
+            http.onreadystatechange = function()
+            {
+                if(http.readyState === 4 && http.status === 401)
+                {
+                    window.location.href='./';
                 }
             };
         }

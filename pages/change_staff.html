@@ -5,7 +5,7 @@
         <title>Modify Staff</title>
     </head>
 
-    <body onload="renderData(); async ">
+    <body onload="authenticate(); renderData(); async ">
 
         <h1>Modify Staff</h1>
 
@@ -63,6 +63,23 @@
                 {
                     alert(http.responseText);
                     window.location.href='../staff'
+                }
+            };
+        }
+
+        function authenticate(){
+            let http = new XMLHttpRequest();
+            let url = '/authenticate';
+
+            http.open('GET', url, true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send()
+
+            http.onreadystatechange = function()
+            {
+                if(http.readyState === 4 && http.status === 401)
+                {
+                    window.location.href='./';
                 }
             };
         }

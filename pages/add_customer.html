@@ -5,7 +5,7 @@
         <title>Add Customer</title>
     </head>
 
-    <body>
+    <body onload="authenticate()">
         <h1>Add Customer</h1>
 
         <form>
@@ -54,6 +54,23 @@
                     window.location.href='../customers'
                 }
 
+            };
+        }
+
+        function authenticate(){
+            let http = new XMLHttpRequest();
+            let url = '/authenticate';
+
+            http.open('GET', url, true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send()
+
+            http.onreadystatechange = function()
+            {
+                if(http.readyState === 4 && http.status === 401)
+                {
+                    window.location.href='./';
+                }
             };
         }
     </script>

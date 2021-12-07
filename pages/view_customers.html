@@ -5,7 +5,7 @@
         <title>Customers</title>
     </head>
 
-    <body onload="viewCustomers(); async ">
+    <body onload="authenticate(); viewCustomers(); async ">
         <div class="table-data">
             <h1>Customer List</h1>
 
@@ -196,6 +196,23 @@
                 stage_two.push(some_element)
             }
             return stage_two
+        }
+
+        function authenticate(){
+            let http = new XMLHttpRequest();
+            let url = '/authenticate';
+
+            http.open('GET', url, true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send()
+
+            http.onreadystatechange = function()
+            {
+                if(http.readyState === 4 && http.status === 401)
+                {
+                    window.location.href='./';
+                }
+            };
         }
     </script>
 </html>

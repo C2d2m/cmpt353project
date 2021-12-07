@@ -6,7 +6,7 @@
         <title>Staff</title>
     </head>
 
-    <body onload="viewStaff(); async" >
+    <body onload="authenticate(); viewStaff()" >
 
         <div class="table-data">
             <h1>Staff List</h1>
@@ -135,5 +135,23 @@
             }
             return stage_two
         }
+
+        function authenticate(){
+            let http = new XMLHttpRequest();
+            let url = '/authenticate';
+
+            http.open('GET', url, true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send()
+
+            http.onreadystatechange = function()
+            {
+                if(http.readyState === 4 && http.status === 401)
+                {
+                    window.location.href='./';
+                }
+            };
+        }
+
     </script>
 </html>

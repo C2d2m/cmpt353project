@@ -30,15 +30,6 @@ connection.connect(function(err) {
 })
 
 
-app.post('/redirect', async (request, reply) => {
-    let filename = request.body.filename;
-
-    const stream = fs.createReadStream(`./pages/${filename}.html`)
-    reply.type('text/html').send(stream)
-
-})
-
-
 
 // Load login page on startup
 app.get('/', async (request, reply) => {
@@ -106,6 +97,11 @@ app.post('/login', async (request, reply) => {
 
     // Hard code Admin
     if (userName === 'admin' && password === 'admin'){
+
+        reply.cookie('Valid','true', {
+            httpOnly: true,
+        });
+
         reply.send('OK')
         return;
     }
@@ -117,13 +113,20 @@ app.post('/login', async (request, reply) => {
     }, function (err, result) {
         if (err) throw err;
         if (result.length === 0){
+            reply.statusCode = 401
             reply.send('ERROR')
             return;
         }
 
         if (result[0].password === passwordHash){
+
+            reply.cookie('Valid','true', {
+                httpOnly: true
+            })
+
             reply.send('OK')
         } else {
+            reply.statusCode = 401
             reply.send('ERROR')
         }
 
@@ -143,15 +146,26 @@ app.post('/add_login', async (request, reply) => {
     })
 
     reply.send(`OK, added ${userName} into login`);
-
 })
 
+app.get('/authenticate', async (request, reply) =>{
+    let cookie = request.cookies.Valid;
+    if (cookie !== 'true'){
+        reply.statusCode = 401
+        reply.send('Access Denied')
+
+    } else {
+        reply.statusCode = 200
+        reply.send('OK, Authentic user')
+    }
+
+})
 
 // STAFF METHODS
 // Send all the staff in the db
 app.get('/staff_view', async (request, reply) => {
-
     //Query Database for customer id of a given first and last name
+
     connection.query({
         sql : 'SELECT * FROM staff'
     }, function (err, result) {
@@ -342,3 +356,4 @@ app.listen(PORT,HOST, (err) => {
         console.log(`listening on ${HOST}:${PORT}`)
     }
 })
+
