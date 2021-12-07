@@ -16,7 +16,7 @@
             <input type="text" id="lname" name="lname"><br>
 
             <label for="pNumber">Phone number:</label><br>
-            <input type="text" id="pNumber" name="pNumber"><br>
+            <input type="text" id="pNumber" name="pNumber" onkeydown="inputValidate()"><br>
 
             <label for="notes">Notes:</label><br>
             <input type="text" id="notes" name="notes">
@@ -73,6 +73,15 @@
                 }
             };
         }
+
+        function inputValidate(){
+            var e = event || window.event;  
+            var key = e.keyCode || e.which;                              
+            if (!(((key>=48)&&(key<=57))|| (key==8) || (key == 46) || (key==9))) { //allow backspace //and delete
+                if (e.preventDefault) e.preventDefault(); 
+                    e.returnValue = false; 
+   }
+ }
     </script>
 
 </html>
